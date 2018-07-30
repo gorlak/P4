@@ -1,0 +1,12 @@
+SubDir P4 map ;
+
+SubDirHdrs $(P4) i18n ;
+
+P4Library $(SUPPORTLIB) :
+	mapchar.cc
+	maphalf.cc
+	mapitem.cc
+	mapjoin.cc
+	mapstring.cc
+	maptable.cc
+	;

@@ -1,0 +1,45 @@
+SubDir P4 net ;
+
+SubDirHdrs $(P4) zlib ;
+
+SubDirC++Flags -I$(SSLINCDIR) [ FDefines Z_PREFIX ] ;
+
+P4Library $(RPCLIB) :
+	netbuffer.cc
+	netconnect.cc
+	;
+
+P4Library $(RPCLIB) :
+	netaddrinfo.cc
+	netipaddr.cc
+	netmulti.cc
+	netportparser.cc
+	netprotectaddr.cc
+	netstd.cc
+	netsslcredentials.cc
+	netsslendpoint.cc
+	netssltransport.cc
+	nettcpendpoint.cc
+	nettcptransport.cc
+	netutils.cc
+	;
+
+DefineVar   netssltransport.cc : OPENSSL_VERSION_TEXT   ;
+DefineVarNQ netssltransport.cc : OPENSSL_VERSION_NUMBER ;
+
+# Rude, crude way to get winsock.h to include the rpc.h in STDHDRS, not in
+# SEARCH_SOURCE.  We _should_ be able to put SEARCH_SOURCE after STDHDRS in
+# the list.  But STDHDRS is put on the command line (last) by jam's
+# Cc rule, and Microsoft's compilers ignore _initial_ duplicate directories
+# in the include search path.
+
+if $(MSVCNT)
+{
+    local t u s ;
+    makeGristedName t : nettcp.cc ;
+    makeGristedName u : nettcpd.cc ;
+    makeGristedName s : netssl.cc ;
+    HDRS on $(t:S=$(SUFOBJ)) = $(HDRS) $(STDHDRS) ;
+    HDRS on $(u:S=$(SUFOBJ)) = $(HDRS) $(STDHDRS) ;
+    HDRS on $(s:S=$(SUFOBJ)) = $(HDRS) $(STDHDRS) ;
+}

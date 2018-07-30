@@ -1,0 +1,18 @@
+SubDir P4 rcs ;
+
+SubDirHdrs $(P4) diff ;
+
+P4DLibrary $(LBRLIB) : 
+	rcsarch.cc
+	rcsci.cc
+	rcsco.cc
+	rcsdate.cc
+	rcsdel.cc
+	rcsdiff.cc
+	rcsgen.cc
+	rcsmeta.cc
+	rcsparse.cc
+	rcsrev.cc
+	rcsvfile.cc
+	;
+

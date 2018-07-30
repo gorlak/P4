@@ -1,0 +1,21 @@
+SubDir P4 msgs ;
+
+SubDirHdrs $(P4) support ;
+
+Ident msgdb.cc ;
+
+P4Library $(SUPPORTLIB) : 
+	msgclient.cc
+	msgdb.cc
+	msgdm.cc
+	msggraph.cc
+	msglbr.cc
+	msgos.cc
+	msgrpc.cc
+	msgserver.cc
+	msgsupp.cc
+	msghelp.cc
+	msgspec.cc
+	p4tagl.cc
+	p4tags.cc
+	;

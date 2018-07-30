@@ -1,0 +1,16 @@
+# These values identify the release and patchlevel represented by these sources.
+
+# RELEASE = year Nth special ;
+#	'year' is the year of the release
+#	'Nth' is which release of the year (1 2 3)
+#	'special' is 'main' for mainline builds and 'beta' for beta builds.
+
+# PATCHLEVEL = changeno ;
+#	Of the source.
+
+# SUPPDATE = yyyy mm dd ;
+#	Of the build.  The copyright date is derived from SUPPDATE.
+
+RELEASE = 2018 1 main ;
+PATCHLEVEL =  1567658 ;
+SUPPDATE = 2017 09 20 ;

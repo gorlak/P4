@@ -1,0 +1,14 @@
+SubDir P4 diff ;
+
+SubDirHdrs $(P4) i18n ;
+
+P4Library $(SUPPORTLIB) : 
+	diff.cc
+	diffan.cc
+	diffflags.cc
+	diffmerge.cc
+	diffmulti.cc
+	diffmultimulti.cc
+	diffsp.cc
+	diffsr.cc
+	;

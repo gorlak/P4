@@ -1,0 +1,46 @@
+From an original README by James Strickland, author of this implementation
+of diff.
+
+Files in this directory
+-----------------------
+
+	Jamfile			- for building with 'jam'
+	README			- this file
+	diff.cc			- simple interface for doing diffs
+	diff.h			- "
+	diffan.cc		- diff analyzer, the hard part
+	diffan.h		- "
+	diffsp.cc		- diff Sequence, crunches a single file
+	diffsp.h		- "
+	difftest.cc		- simple test harness for a diff program
+
+External Dependencies
+---------------------
+
+	These files rely on the (read) file access routines provided
+	by RcsFile, as defined in rcsfio.h.
+
+	These files also use stdhdrs.h, a wrapper for system header files
+	that uses #define's to determine what to include.  Mostly all that
+	are needed are the very common headers (stdio.h, string.h, stdlib.h)
+	and the types header (sys/types.h).
+
+Debugging
+---------
+
+	Note that there are a number of
+
+	#if DEBUGLEVEL > n
+	 .... debugging output ....
+	#endif
+
+	blocks in the code.  If DEBUGLEVEL is not defined, then it is
+	#define'd to be zero.  DEBUGLEVEL=1 produces a reasonable amount of
+	output (summary information such as #lines).  
+
+What do they do?
+----------------
+
+	p4diff (difftest.cc) provides the same style of output as GNU
+	diff.  The output is often identical to that of diff(1), although
+	sometimes this implementation picks a different edit sequence.

@@ -1,0 +1,83 @@
+SubDir P4 sys ;
+
+SubDirC++Flags [ FDefines Z_PREFIX ] ;
+
+SubDirHdrs $(P4) zlib ;
+SubDirHdrs $(P4) i18n ;
+
+P4Library $(SUPPORTLIB) : 
+	applefork.cc
+	echoctl.cc
+	enviro.cc
+	errorlog.cc
+	fblreader.cc
+	filecheck.cc
+	filegen.cc
+	filedirs.cc
+	fileio.cc
+	fileiobuf.cc
+	fileiosym.cc
+	fileiouni.cc
+	fileiozip.cc
+	filemkdir.cc
+	filespace.cc
+	filestrbuf.cc
+	filesys.cc
+	filetmp.cc
+	hostenv.cc
+	fdutil.cc
+	pathmac.cc
+	pathnt.cc
+	pathunix.cc
+	pathsys.cc
+	pathvms.cc
+	pid.cc
+	readfile.cc
+	resvmem.cc
+	runcmd.cc
+	rusage.cc
+	shhandler.cc
+	signaler.cc 
+	stdhdrs.cc
+	threading.cc
+	timer.cc
+	zfilestream.cc
+	zipfile.cc
+	zlinflater.cc
+	zlmeminflater.cc
+	;
+
+if $(OS) = MACOSX
+{
+	P4Library $(SUPPORTLIB) : 
+		macfile.cc
+		fileioappm.cc
+		fileiomac.cc
+		macutil.m
+		;
+}
+else
+{
+	P4Library $(SUPPORTLIB) :
+		fileioapp.cc ;
+}
+
+if $(OS) = NT || $(OS) = MINGW || $(OS) = MINGW64
+{
+	P4Library $(SUPPORTLIB) : 
+		fileiont.cc
+		ntmangle.cc
+		nterror.cc
+		ntinvargs.cc
+		ntservice.cc
+		ntthdlist.cc ;
+}
+
+if $(OS) = VMS
+{
+	P4Library $(SUPPORTLIB) :
+		fileiovms.cc ;
+}
+
+P4Library $(SHSTUBLIB) : 
+	shstub.cc ;

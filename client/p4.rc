@@ -1,0 +1,46 @@
+// VERSIONINFO resource file adapted from the example on the following page;
+// http://msdn.microsoft.com/en-us/library/aa381058(VS.85).aspx
+
+#include <winver.h>
+
+HELIX_HEXAGON ICON "p4.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     P4_INT_MAJOR,P4_INT_MINOR,P4_INT_HBUILD,P4_INT_LBUILD
+PRODUCTVERSION  P4_INT_MAJOR,P4_INT_MINOR,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName", "Perforce Software Inc."
+            VALUE "FileDescription", "Helix Command-Line Client"
+            VALUE "FileVersion", P4_FILE_VERSION
+            VALUE "InternalName", "p4.exe"
+            VALUE "LegalCopyright", "Copyright (C) 1995-" P4_COPYRIGHT
+//          VALUE "LegalTrademarks1", VER_LEGALTRADEMARKS1_STR
+//          VALUE "LegalTrademarks2", VER_LEGALTRADEMARKS2_STR
+            VALUE "OriginalFilename", "p4.exe"
+            VALUE "ProductName", "P4"
+            VALUE "ProductVersion", P4_PRODUCT_VERSION
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        /* The following line should only be modified for localized versions.     */
+        /* It consists of any number of WORD,WORD pairs, with each pair           */
+        /* describing a language,codepage combination supported by the file.      */
+        /*                                                                        */
+        /* For example, a file might have values "0x409,1252" indicating that it  */
+        /* supports English (United States) language (0x409) in the Windows ANSI  */
+        /* codepage (1252). */
+
+        VALUE "Translation", 0x409, 1252
+
+    END
+END

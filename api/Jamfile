@@ -1,0 +1,104 @@
+SubDir P4 api ;
+
+SubDirHdrs $(P4) ;			# just for Jamrules
+SubDirHdrs $(P4) client ;
+SubDirHdrs $(P4) diff ;
+SubDirHdrs $(P4) rpc ;
+SubDirHdrs $(P4) i18n ;
+SubDirHdrs $(P4) sys ;
+SubDirHdrs $(P4) net ;		# just for API
+SubDirHdrs $(P4) tests ;	# just for API
+SubDirHdrs $(P4) web ;
+
+# API: libs and src
+
+P4Api p4api : 
+
+	Jamrules
+	Version
+
+	Jamfile.api
+
+	$(CLIENTLIB) 
+	$(RPCLIB) 
+	$(SUPPORTLIB)
+
+	base64.h
+	charcvt.h
+	charman.h
+	charset.h
+	clientapi.h
+	clientmerge.h
+	clientprog.h
+	clientresolvea.h
+	clientuser.h
+	datetime.h
+	debug.h
+	diff.h
+	diffmerge.h
+	echoctl.h
+	enviro.h
+	error.h
+	errorlog.h
+	errornum.h
+	filesys.h
+	handler.h
+	hostenv.h
+	i18napi.h
+	ident.h
+	ignore.h
+	keepalive.h
+	macfile.h
+	macutil.h
+	mangle.h
+	mapapi.h
+	md5.h
+	msgclient.h
+	msgdb.h
+	msgdm.h
+	msggraph.h
+	msgos.h
+	msgrpc.h
+	msgserver.h
+	msgsupp.h
+	netbuffer.h
+	netconnect.h
+	netportparser.h
+	ntmangle.h
+	ntservice.h
+	options.h
+	p4tags.h
+	pathsys.h
+	runcmd.h
+	serverhelperapi.h
+	sha1.h
+	sha256.h
+	signaler.h
+	spec.h
+	stdhdrs.h
+	strarray.h
+	strbuf.h
+	strdict.h
+	strops.h
+	strtable.h
+	strxml.h
+	threading.h
+	ticket.h
+	validate.h
+	vararray.h
+	web822.h
+
+	clientuser.cc
+	p4api.cc
+	p4dvcsapi.cc
+	;
+
+# Just to make sure the API builds
+
+P4Main p4api : p4api.cc ;
+LinkLibraries p4api : $(CLIENTLIB) $(RPCLIB) $(SUPPORTLIB) ;
+
+P4Main p4dvcsapi : p4dvcsapi.cc ;
+LinkLibraries p4dvcsapi : $(CLIENTLIB) $(RPCLIB) $(SUPPORTLIB) ;
+
+

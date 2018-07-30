@@ -1,0 +1,20 @@
+SubDir P4 zlib ;
+
+local  CCFLAGS = $(CCFLAGS) [ FDefines Z_PREFIX ] ;
+local C++FLAGS = $(CCFLAGS) [ FDefines Z_PREFIX ] ;
+
+P4Library $(SUPPORTLIB) : 
+	adler32.c
+	crc32.c
+	deflate.c
+	gzip.cc
+	inffast.c
+	inflate.c
+	inftrees.c
+	ioapi.c
+	trees.c
+	unzip.c
+	zip.c
+	zutil.c 
+	;
+

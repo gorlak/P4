@@ -1,0 +1,7 @@
+SubDir P4 sslstub ;
+
+SubDirHdrs $(P4) sslstub ;
+
+P4Library $(P4SSLLIB) :
+	sslstub.cc
+	;

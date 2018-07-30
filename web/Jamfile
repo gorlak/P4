@@ -1,0 +1,7 @@
+SubDir P4 web ;
+
+SubDirHdrs $(P4) client ;
+SubDirHdrs $(P4) net ;
+SubDirHdrs $(P4) rpc ;
+
+P4Library $(CLIENTLIB) : web822.cc ;

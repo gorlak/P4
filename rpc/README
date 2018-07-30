@@ -1,0 +1,187 @@
+The Perforce Client/Service Protocol
+
+    Message Passing
+
+	Though called RPC, it is in fact a message passing mechanism.
+	The difference being that in a message passing scheme the response
+	is both asynchronous and optional, and the driver of the connection
+	is a matter of agreement rather than predestiny.
+
+	Each message is a list of variable/value pairs, with one variable
+	('func') whose value is associated with some function call.
+
+	Rpc::Invoke() sends a single message and Rpc::Dispatch() loops,
+	reading messages and executing the associated function calls,
+	until a special 'release' message is received.
+
+    Basic Flow
+
+   	The client sends a message containing the user's request to the
+	server and then dispatches, i.e. reads and executes requests from
+	the server until the server sends the "release" message.
+
+	The server initially dispatches, i.e. reads and executes a
+	request from the user.  The final act of the request should
+	either be to release the client (send the "release" message),
+	or send a message to the client instructing it to invoke
+	(eventually) another server request.  In the end, the final
+	message sent to the client should be "release".
+
+    Notes on flow control.
+
+	This collection of functions orchestrates the flow control when
+	data must move in both directions between the client and server
+	at the same time.  This is done without async reads or writes.
+	Instead we rely on cues from our caller for the amount of data
+	expected to make a round trip, and periodically stop writing
+	and read for a while.
+
+	Normally, the caller uses Invoke() to launch functions to the
+	other side, and then Dispatch() (which calls DispatchOne()) to
+	listen for responses.  Dispatch() returns when the other side
+	launches a "release" or "release2" in our direction.
+
+	But if the caller is expecting data to come back, it can't just
+	call Invoke() indefinitely without calling Dispatch(), as the
+	other end's Dispatch() may be busy making the responding Invoke()s
+	and not reading ours.
+
+	So if the caller expects data to make a round trip, it calls
+	InvokeDuplex(), which calls DispatchDuplex() to count the amount
+	of data being sent (and thus expected to be received).  For every
+	700 bytes so sent, DispatchDuplex() introduces a marker (a
+	"flush1" message), which makes a round trip through the other
+	and and returns as a "flush2" message.  If there are more than
+	2000 bytes of data send out but not acknowledged by "flush2",
+	DispatchDuplex() starts calling Dispatch() to look for the
+	"flush2" message, processing any pending messages along the way.
+
+	If the remote operation is expected to send a lot of data,
+	like a file, we use InvokeDuplexRev().	This assumes that the
+	reverse pipe is always full and so counts all data going forward,
+	namely non-roundtrip data with Invoked().  It puts a marker in
+	the "flush1" message so that it can track what data sent with
+	InvokedDuplexRev() is outstanding.
+
+	The caller is expected to call FlushDuplex() after the last call
+	to InvokeDuplex() to ensure the pipe is clear.  Not doing so
+	could cause a subsequent "release" message to get introduced into
+	the conversation before it has fully quieted.
+
+	In one case (in server/userrelease.cc) an operation dispatched
+	from DispatchDuplex() may call InvokeDuplex() again, which could
+	lead to a nesting of DispatchDuplex() calls.  To avoid this, the
+	inDuplex flag gates entry into DispatchDuplex() to ensure there is
+	only one active at a time.  XXX ughly.
+
+    Lo Mark/Hi Mark Calculation and Accuracy
+
+	The 700 byte threshhold before sending "flush1" is called the
+	"lomark".  The 2000 byte threshhold before dispatching is called
+	the "himark".  These historical values (particularly the himark)
+	perform poorly over long latency, high bandwidth connections,
+	just as small TCP windows do.  For this reason, the himark is
+	recalculated at connection startup time, taking into account the
+	TCP send and receive buffer sizes of the client and server.
+
+	A himark that is too high can lead to a write/write deadlock,
+	due to both client and server send and receive buffers being
+	full, but slight miscalculation in the himark can be hard to
+	detect because there are a number of places data can hide:
+
+	1. It's always either the client->server side of the connection
+	   (for submit), or the server->client side (for sync, etc) that
+	   is congested, not both.  On the uncongested side, oustanding
+	   duplex messages may still be in transit, except during large
+	   file transfers (where file content fills the pipe).
+
+	2. One duplex message can be in the RpcSendBuffer of the client.
+
+	3. After the first server Dispatch(), the NetBuffer (4k) on the
+	   server can be partially filled with duplex messages from the
+	   client.
+
+	4. We 'guess' a size of the flush1 message, because we have
+	   to include its size in the fseq value in the message itself,
+	   and we deliberately overestimate flush1 to be 60 bytes instead
+	   of the more likely 45-50.  That gives us a little slop for
+	   duplex messages.
+
+    Flow Control Scenarios
+
+	1. "primal": client sends initial command.
+
+            Client                              Server
+            ---------------                     -------------
+            |             |                     |           |
+            | Invoke      |  ====== >>> ======  | Dispatch  |
+            |             |                     |           |
+            ---------------                     -------------
+
+	2. "callback": server instructing client.  Continues until
+	   server sends 'release'.  Output-only commands all work
+	   this way.
+
+            Client                              Server
+            ---------------                     -------------
+            |             |                     |           |
+            |             |                     | Dispatch  |
+            | Dispatch    |  ====== <<< ======  | Invoke    |
+            |             |                     |           |
+            ---------------                     -------------
+
+	3. "loop": server instructs client to send another message
+	   to continue flow of control.  Spec editing commands work
+	   this way: when the user editing is done, the client does
+	   another Invoke().
+
+            Client                              Server
+            ---------------                     -------------
+            |             |                     |           |
+            | Dispatch    |                     |           |
+            | Invoke      |  ====== >>> ======  | Dispatch  |
+            |             |                     |           |
+            ---------------                     -------------
+
+	4. "duplex": server instructs client to send acks of operations.
+	   InvokeDuplex() counts the amount of data in repsonses expected
+	   from the client and periodically calls DispatchDuplex()
+	   to handle responses.  Client file update commands use this to
+	   send transfer acks to the server.
+
+            Client                              Server
+            ---------------                     ------------------
+            |             |                     |                |
+            |             |                     | Dispatch       |
+            | Dispatch    |  ====== <<< ======  | InvokeDuplex   |
+            | Invoke      |  ====== >>> ======  | DispatchDuplex |
+            |             |                     |                |
+            ---------------                     ------------------
+
+	5. "duplexrev": like duplex, but InvokeDuplexRev() assume channel
+	   from client to always full, and so counts the amount of data
+	   sent from the server to the client.  Commands that send file
+	   data to the server use this.
+
+            Client                              Server
+            ---------------                     ------------------
+            |             |                     |                |
+            |             |                     | Dispatch       |
+            | Dispatch    |  ====== <<< ======  | InvokeDuplexRev|
+            | Invoke      |  ==== >>>>>>> ====  | DispatchDuplex |
+            |             |                     |                |
+            ---------------                     ------------------
+
+	6. "nested": happens with duplex when the response to the server
+	   causes yet another Invoke() to be called.  Only 'revert -a' needs
+	   this.
+
+            Client                              Server
+            ---------------                     ------------------
+            |             |                     |                |
+            |             |                     | Dispatch       |
+            | Dispatch    |                     | InvokeDuplex   |
+            |             |  ====== >>> ======  | DispatchDuplex |
+            |             |  ====== <<< ======  | InvokeDuplex   |
+            |             |                     |                |
+            ---------------                     ------------------

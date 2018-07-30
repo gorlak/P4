@@ -1,0 +1,23 @@
+SubDir P4 rpc ;
+
+SubDirHdrs $(P4) net ;
+
+SubDirC++Flags -I$(SSLINCDIR) [ FDefines Z_PREFIX ] ;
+
+P4Library $(RPCLIB) :
+	rpc.cc
+	rpcbuffer.cc
+	rpcdebug.cc
+	rpcdispatch.cc
+	rpcfwd.cc
+	rpcmulti.cc
+	rpcservice.cc
+	rpctrans.cc
+	;
+
+if $(ZK) = yes
+{
+	P4DLibrary $(RPCLIB) :
+		rpczksclient.cc
+		;
+}

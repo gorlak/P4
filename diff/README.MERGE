@@ -1,0 +1,148 @@
+About file resolution
+Jeff Anton
+Perforce Software
+COMPANY CONFIDENTIAL
+
+1/7/2004
+
+This is a description of how the diff merge process works as I
+understand it.
+
+First lets get some concepts down...
+
+Users of the merge class diffmerge supply files and call DiffMerge::Read
+many time until the contents are delivered.  On each call a chunk
+of results are returned along with a return code which indicates
+from which file the results originate from and whether the results
+are in conflict.
+
+The best way to see this work is to run p4 merge3 which shows the
+result blocks and the source/conflict indicator.  If you use the
+'-r' option to merge3 then the RCS like merge result is written not
+the individual blocks.  p4 merge3 runs entirely in the p4 client
+and on the files provided.
+
+Now lets discuss how diffmerge works in different levels of detail.
+
+The merge process starts by getting the differences between the
+base file and each of the two legs.  That is two diffs.  These diffs
+are represented by regions of lines known to be different.  For
+example, lines 5 through 10 in the base file do not match lines 7
+through 11 in the other (leg) file.  Regions of lines between these
+diff regions will match.  Each leg has a list of regions which do
+not match against the base.  These lists are ordered.  DiffMerge::Read
+takes these two lists of diffs and then runs a complex state machine
+which produces the results.
+
+Now about that DiffMerge::Read state machine.
+
+DiffMerge::Read returns blocks of output which can be one of ALL
+meaning that both legs are in agreement with the base file L1 and/or
+L2 with possible conflict indicating that some or both legs differ
+from the base and whether those legs conflict in their differences
+with the base.  This is pretty simple once you understand the diff
+regions mentioned previously.  You just have to start at the start
+of the base file and look at the top diff region of each of the
+legs.  If the legs diff regions both start after the start of the
+file the method will advance its position in the base file and emit
+the lines common to all files until the first diff is reached.  Once
+there is a diff the two legs are examined to see which one comes
+first and then if they overlap.  If there is no overlap then it is
+a simple change imposed by one of the two legs.  The state machine
+emits the base version lines which cover the diff, then the lines
+in the leg which those lines were changed to (or deleted).  Then
+the machine goes back to the top emitting lines in common until the
+next diff region is reached.  The hard bit occurs when both legs
+of a diff region overlap.  Then a conflict is present.  To report
+that conflict the two diff regions of the two legs have to be made
+to cover the same lines in the base file.  This can be that one leg
+changes three lines and the other leg changes only two lines.  This
+"common base coverage" is needed because in the merged file we want
+to report the base lines and each of the conflicting legs without
+emitting lines of the base multiple times and for general readability.
+The leg diff regions can be expanded by extending the base and leg
+regions by identical number of lines.  This will increase a region
+to include lines which do not really differ, but it can make the
+two diff legs source regions match the base region.  However, this
+extention might bump up against the next diff region in which case
+that next diff region must be merged into the first and then the
+other leg diff region must again be looked at to assure common base
+coverage.  If there are many alternating overlapping changes this
+can make a conflict appear very large.  Once the conflicting diff
+regions were settled, those regions which be checked for identical
+content and if identical the changes would be in both legs but not
+the base and that was reported as a BOTH case and emitted once as
+a common change.
+
+That's basically it except it is worth discussing what overlap
+really means.  The overlap test occurs by testing the line number
+of the diff regions on the source (base) side of the diff region
+because the source side of the diff refers to the lines of the base
+file which are a common reference.  Pre 2003.1 perforce considered
+diffs to overlap if the two leg diff regions touched.  The diff
+regions are represented as a start line number which is included
+in the region and an end line number which is just past the end of
+the region.  This is an interval sometimes represented symbolicly
+as "[start, end)" The 2003.1 release changed the overlap rule to
+allow these regions/intervals to be adjacent (touch) as long as
+they do not really overlap (i.e. loose vs. strict overlap.) but two
+diff regions which are inserts have base file regions where the
+start and end lines numbers are the same i.e. no lines in the base
+are changed/removed.  The test was carefully coded so that two
+inserts at the same point in the base would be reported as a conflict
+but the other touching cases would not.  This was found to cause
+some confusion when inserts were adjacent to changes and those
+inserts and changes had lines in common.  This caused apparent
+duplicate changes so the overlap rule was changed again to report
+that inserts adjacent to changes would be in conflict leaveing only
+the case that two changes (i.e. diff regions with non-empty source/base
+regions) that are adjacent will not be considered overlapping.
+(This change was done through a bug fix/change.)
+
+New conflict resolution....
+
+The new conflict handling code occurs once a conflict is found but
+before that conflict is adjusted to have a common base range as
+mentioned above.
+
+When the first conflict is encountered a third diff between the two
+legs is performed.  This diff provides information on regions common
+to the two legs and helps breakup conflict regions into more regions
+which would not conflict.
+
+The new code works as follows...
+
+If a common region between the two legs is found which overlaps
+both legs of the conflict then we can be smart, otherwise we just
+handle the conflict as before.
+
+Since there is some common region between the two halfs of the
+conflict there is something smart we can do.  We start by checking
+if the common region covers the first lines of the two change legs.
+If neither change leg starts in the common region, both legs are
+split to create to conflicting regions with nothing in common and
+that is then handled normally. If one leg is in the common region
+but the other is not, the other leg has a new change.  This is split
+off and handled as a LEG1 or LEG2 change.  This split is tricky to
+cover the base range or not.  The base range adjustment is based
+on the leg being at the start or end of diff legs.  If both legs
+start with lines in common, if the diff legs have different line
+counts the smaller leg is expanded to match the longer leg to the
+extent that lines continue to stay in common.  This expansion is
+handled in part by the ExpandBy method which takes care to see if
+the expansion runs up against subsequent diffs from that leg and
+carefully adjusts the base if subsequent legs are included.  At
+this point we make another check if the two diff legs have the same
+number of lines and if not the longer is split to match the shorter.
+After all this we have a BOTH (i.e. not conflicting block) which
+is handled normally.
+
+There is one last check for an insert being adjacent to a change
+and insert or change is allowed through without conflict.  This was
+considered a conflict earlier so as to get this case into the new
+conflict handling code, but the new conflict code will generate
+apparent inserts so those need to go through.  Because the new code
+can tell when inserts match changes we should not see the duplicate
+lines problem that was seen and required stricter handleing.
+
+This process iterates again and that's it.

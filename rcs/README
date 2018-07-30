@@ -1,0 +1,54 @@
+The Perforce RCS implementation
+-------------------------------
+
+An overview of the implementation is in rcstest.cc.
+
+This README discusses the ifdefs and system dependencies herein.
+
+
+ifdefs
+------
+
+	USE_CRLF - used to control whether LF or CRLF separate lines
+		in RCS files.  Normally set by Jamrules for NT.
+
+	USE_MMAP - if set, uses the mmap() system call for read access
+		to RCS files.  Otherwise, uses stdio.  By an large, you
+		want this set if mmap is available.  Normally set by
+		Jamrules.
+
+	HAVE_FSYNC - if set, calls fsync() before closing the RCS file
+		(after writing it), so that it is sure to hit the disk.
+		Set by stdhdrs.h based on what OS you're on.
+
+	OS_NT - used to control some NT specific filesystem operations,
+		like the different call to access() and setting O_NOINHERIT
+		to keep file handles private across subprocess creation.
+		(RCS formerly used an external diff but now does everything
+		inprocess, and so O_NOINHERIT is unneeded. )
+
+	OS_BEOS - BeOS specific interface changes.
+
+	OS_MAC - Macintosh MPW specific interface changes.  
+
+External Code Dependencies.
+
+	support/error.h - for the Error class, a layered error reporting
+		mechanism.  It's used throughout, but is the only component
+		of 'support' that is needed for RCS.
+
+	sys/stdhdrs.h - included standard system headers needed by everything,
+		plus special headers as controlled by #define NEED_XXX flags.
+		The headers used are:
+
+		    NEED_ACCESS
+		    NEED_FCNTL
+		    NEED_FILE
+		    NEED_FSYNC
+		    NEED_MKDIR
+		    NEED_MMAP
+		    NEED_OPENDIR
+		    NEED_TIME
+		    NEED_TYPES
+
+		See stdhdrs.h for what these control.

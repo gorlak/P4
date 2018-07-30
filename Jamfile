@@ -1,0 +1,45 @@
+SubDir P4 ;
+
+SubInclude P4 auth ;
+SubInclude P4 client ;
+SubInclude P4 db ;
+SubInclude P4 dbpipe ;
+SubInclude P4 dbsupp ;
+SubInclude P4 dbopen2 ;
+SubInclude P4 diff ;
+SubInclude P4 dm ;
+SubInclude P4 dma ;
+SubInclude P4 dmc ;
+SubInclude P4 dmi ;
+SubInclude P4 dml ;
+SubInclude P4 dmobj ;
+SubInclude P4 dmp ;
+SubInclude P4 dmr ;
+SubInclude P4 dmrpc ;
+SubInclude P4 dms ;
+SubInclude P4 dmx ;
+SubInclude P4 i18n ;
+SubInclude P4 jsmn ;
+SubInclude P4 lbr ;
+SubInclude P4 lbrobj ;
+SubInclude P4 map ;
+SubInclude P4 msgs ;
+SubInclude P4 net ;
+SubInclude P4 proxy ;
+SubInclude P4 rcs ;
+SubInclude P4 rpc ;
+SubInclude P4 server ;
+SubInclude P4 sslstub ;
+SubInclude P4 support ;
+SubInclude P4 sys ;
+SubInclude P4 web ;
+SubInclude P4 zlib ;
+
+SubInclude P4 broker ; # Must be after db
+
+if $(X3) = yes { SubInclude P4 xfer3rd ; }
+
+if $(PRODUCTION) { API ?= x ; }
+
+if $(API) { SubInclude P4 api ; }
+if $(TESTS) { SubInclude P4 tests ; }

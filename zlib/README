@@ -1,0 +1,27 @@
+Instructions and hints regarding the Zlib library.
+--------------------------------------------------------------------------------
+
+Zlib site: http://zlib.net/
+perforce:1666 import directory: //depot/import/zlib/...
+
+When upgrading Zlib, ensure that job022258 (Mangle zlib linker-visible names)
+does not regress.  This is to support users linking against both our API and
+other versions of Zlib.  For Zlib 1.1.4, change 98998 added zsymbols.h to fix
+this job (adding the PZ_ prefix.)  For 1.2.5, Zlib added compile-time support
+for symbol prefixes in zconf.h (with the z_ prefix,) which we changed to be
+hard-coded.  To revert to making it a compile-time flag, undo the change to
+zconf.h and define Z_PREFIX (be aware that 641267 tried this and caused
+compile errors on HPUX11IA64.)
+
+Two ways of finding out what symbols are in a file (on ELF-based unix) are:
+
+        nm --extern-only p4d | grep z_ | awk '{print $3}' | sort
+   readelf --symbols     p4d | grep z_ | awk '{print $8}' | sort
+
+Note that the Zlib gzip is not the same as gzip.cc - our C++ wrapper.  The
+Zlib distro includes a number of unneeded files.
+
+Zlib is used in various parts of the P4 codebase:  btree(crc32 - must be fast,)
+server networking and client.  Also make sure that a Zlib upgrade doesn't break
+non-C++ APIs such as p4-java.  Testing on platforms with different endianness
+is prudent.

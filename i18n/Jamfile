@@ -1,0 +1,20 @@
+SubDir P4 i18n ;
+
+SubDirHdrs $(P4) sys ;
+
+P4Library $(SUPPORTLIB) :
+	charcvt.cc
+	charman.cc
+	charset.cc
+	charfold.cc
+	basecvt.cc
+        i18napi.cc
+	simplecvt.cc
+	unicvt.cc
+	transdict.cc
+	jptables.cc
+	krtables.cc
+	cn936.cc
+	cn950.cc
+	validate.cc
+	;
