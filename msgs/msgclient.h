@@ -113,6 +113,7 @@ class MsgClient {
 	static ErrorId AliasEmptyPattern;
 
 	static ErrorId NoModifiedFile;
+	static ErrorId DevErr;
 
 	// Retired ErrorIds. We need to keep these so that clients 
 	// built with newer apis can commnunicate with older servers 

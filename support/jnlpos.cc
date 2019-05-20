@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdhdrs.h>
 #include <strbuf.h>
+#include <strdict.h>
 
 #include "jnlpos.h"
 
@@ -110,4 +111,57 @@ void
 JnlPos::Parse( const StrPtr &txt )
 {
 	Parse( txt.Text() );
+}
+
+const StrPtr &
+JnlPos::Fmt( StrBuf &buf )
+{
+	buf << journalNumber << "/" << journalOffset;
+
+	return buf;
+}
+
+bool
+JnlPos::GetVar( StrDict *dict, const char *tagNum, const char *tagSequence )
+{
+	const StrPtr *sJournalNumber = dict->GetVar( tagNum );
+	const StrPtr *sJournalOffset = dict->GetVar( tagSequence );
+
+	if( !sJournalNumber || !sJournalOffset )
+	{
+	    return false;
+	}
+
+	if( *sJournalNumber != "POS_MAX" || *sJournalOffset != "POS_MAX" )
+	{
+	    journalNumber = sJournalNumber->Atoi();
+	    journalOffset = sJournalOffset->Atoi64();
+	}
+	else
+	{
+	    /*
+	     * JnlPos( POS_MAX ) was sent independent of platform (and cheaper).
+	     */
+	    *this = JnlPos( POS_MAX );
+	}
+
+	return true;
+}
+
+void
+JnlPos::SetVar( StrDict *dict, const char *tagNum, const char *tagSequence )
+{
+	if( !IsPosMax() )
+	{
+	    dict->SetVar( tagNum, journalNumber );
+	    dict->SetVar( tagSequence, journalOffset );
+	}
+	else
+	{
+	    /*
+	     * Send JnlPos( POS_MAX ) independent of platform (and cheaper).
+	     */
+	    dict->SetVar( tagNum, "POS_MAX" );
+	    dict->SetVar( tagSequence, "POS_MAX" );
+	}
 }

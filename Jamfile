@@ -1,5 +1,50 @@
 SubDir P4 ;
 
+# Define the default language standard.  This is used by the
+# Jamrules C++FLAGS+STD function - it knows to remove the flag if
+# it's already there when adding a different version of the standard.
+
+local C++_VERSION_BASELINE = c++17 ;
+
+# Like the baseline, we define the highest version of the standard we
+# wish to use.
+
+local C++_VERSION_MAX = c++17 ;
+
+# We want to ensure that certain parts of the code use a portable version
+# of the standard, but we can't do it by default since mixing objects
+# compiled with different versions of the standard isn't safe and isn't
+# compatible with LTO, so we only do it by request.
+#
+# According to the steps in https://gcc.gnu.org/wiki/Cxx11AbiCompatibility we're
+# safe, but we'd still like to use LTO so we still have to do this.
+
+if $(C++_LANGUAGE_COMPAT_CHECK) = 1 { C++_VERSION_BASELINE = c++98 ; }
+
+# Now we set the standard for the entire project.  There are overrides that
+# set C++_VERSION_MAX in the non-P4API parts of the code (e.g. the server).
+
+local C++FLAGS = [ C++FLAGS+STD $(C++_VERSION_BASELINE) ] ;
+
+if $(OS) = NT && $(MSVSVER) >= 15
+{
+	# VS doesn't keep the __cpluplus macro accurate by default.
+	# https://blogs.msdn.microsoft.com/vcblog/2018/04/09/msvc-now-correctly-reports-__cplusplus/
+	C++FLAGS = /Zc:__cplusplus $(C++FLAGS) ;
+}
+
+if $(OS) = NT
+{
+	C++FLAGS += /EHsc ;
+
+	# For Extensions, libcURL
+	C++FLAGS += /DCURL_STATICLIB ;
+}
+else
+{
+	C++FLAGS += -DCURL_STATICLIB ;
+}
+
 SubInclude P4 auth ;
 SubInclude P4 client ;
 SubInclude P4 db ;
@@ -10,6 +55,7 @@ SubInclude P4 diff ;
 SubInclude P4 dm ;
 SubInclude P4 dma ;
 SubInclude P4 dmc ;
+SubInclude P4 dme ;
 SubInclude P4 dmi ;
 SubInclude P4 dml ;
 SubInclude P4 dmobj ;
@@ -25,6 +71,7 @@ SubInclude P4 lbrobj ;
 SubInclude P4 map ;
 SubInclude P4 msgs ;
 SubInclude P4 net ;
+SubInclude P4 script ;
 SubInclude P4 proxy ;
 SubInclude P4 rcs ;
 SubInclude P4 rpc ;

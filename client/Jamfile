@@ -5,6 +5,7 @@ SubDirHdrs $(P4) i18n ;
 SubDirHdrs $(P4) map ;
 SubDirHdrs $(P4) net ;
 SubDirHdrs $(P4) rpc ;
+SubDirHdrs $(P4) script ;
 
 Ident clientmain.cc client.cc clientinit.cc serverhelper.cc ;
 
@@ -17,18 +18,21 @@ if $(OS) = NT
 LinkLibraries p4 :
 	$(CLIENTLIB)
 	$(RPCLIB)
+	$(P4SCRIPT)
+	$(P4SCRIPT_CURL)
+	$(P4SCRIPT_SQLITE)
 	$(SUPPORTLIB)
 	;
 
-P4Main p4 : clientmain.cc ;
+P4Main p4 : clientmain.cc clientaliases.cc ;
 
 P4Library $(CLIENTLIB) : 
 	client.cc
-	clientaliases.cc
 	clientapi.cc
 	clientenv.cc
 	clienti18n.cc
 	clientinit.cc
+	clientlegal.cc
 	clientmerge.cc
 	clientmerge2.cc
 	clientmerge3.cc
@@ -47,4 +51,3 @@ P4Library $(CLIENTLIB) :
 	serverhelper.cc
 	serverhelperapi.cc
 	;
-

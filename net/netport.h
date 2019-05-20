@@ -147,8 +147,8 @@ extern "C" int setsockopt( int, int, int, void *, int );
 	defined( OS_FREEBSD )   || defined( OS_OPENBSD)    || \
         defined( OS_NETBSD )    || defined( OS_LYNX )      || \
 	defined( OS_SOLARIS8 )  || defined( OS_SOLARIS10 ) || \
-	defined( OS_MACOSX104 ) || defined( OS_DARWIN )    || \
-	defined( OS_AIX53 )
+	( defined( OS_MACOSX )  && OS_VER >= 104 )      || \
+	defined( OS_DARWIN )    || defined( OS_AIX53 )
 # define TYPE_SOCKLEN socklen_t
 # endif
 # ifdef OS_AIX

@@ -103,6 +103,7 @@ class ClientMerge;
 class ClientResolveA;
 class ClientProgress;
 class ClientTransfer;
+class ClientSSO;
 class ClientApi;
 
 class ClientUser {
@@ -116,6 +117,7 @@ class ClientUser {
 			    autoLogin = autoLoginPrompt;
 			    outputTaggedWithErrorLevel = 0;
 			    transfer = 0;
+			    ssoHandler = 0;
 			}
 	virtual		~ClientUser();
 
@@ -187,6 +189,12 @@ class ClientUser {
 	virtual void	SetTransfer( ClientTransfer* t );
 	virtual ClientTransfer*	GetTransfer() { return transfer; }
 
+	// ClientSSO allows the P4LOGINSSO behavor to be overriden from the
+	// application using the P4API. This is intended for use where an SSO
+	// agent would not be able to be directly invoked on the user's machine
+	virtual void	SetSSOHandler( ClientSSO* t );
+	virtual ClientSSO*	GetSSOHandler() { return ssoHandler; }
+
 	// Output... and Help must use 'const char' instead of 'char'
 	// The following will cause compile time errors for using 'char'
 	virtual int 	OutputError( char *errBuf )
@@ -210,6 +218,7 @@ class ClientUser {
 	StrBuf		editFile;
 	int		outputTaggedWithErrorLevel;	// "p4 -s cmd" yes/no
 	ClientTransfer	*transfer;
+	ClientSSO	*ssoHandler;
 
 } ;
 
@@ -232,6 +241,23 @@ class ClientTransfer {
 			          StrDict &pVars,
 			          int threads,
 			          Error *e ) = 0;
+};
+
+enum ClientSSOStatus {
+	CSS_PASS,	// SSO succeeded (result is an authentication token)
+	CSS_FAIL,	// SSO failed (result will be logged as error message)
+	CSS_UNSET,	// Client has no SSO support
+	CSS_EXIT,	// Stop login process
+	CSS_SKIP	// Fall back to default P4API behavior
+};
+
+class ClientSSO {
+    public:
+	virtual			~ClientSSO() {}
+
+	virtual ClientSSOStatus	Authorize( StrDict &vars,
+				           int maxLength,
+				           StrBuf &result ) = 0;
 };
 
 /*

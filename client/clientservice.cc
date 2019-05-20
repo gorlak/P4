@@ -2574,6 +2574,77 @@ clientSingleSignon( Client *client, Error *e )
 	    return;
 	}
 
+	StrBufDict SSODict;
+	StrRef var, val;
+	for( int i = 0; client->GetVar( i, var, val ); i++ )
+	{
+	    if( var == P4Tag::v_func   ||
+	        var == P4Tag::v_func2  ||
+	        var == P4Tag::v_state  ||
+	        var == P4Tag::v_confirm )
+	        continue;
+
+	    SSODict.SetVar( var, val );
+	}
+
+	// Allow the trigger to know if it's talking through a broker or
+	// proxy since the serverAddress will be different in this case.
+	
+	SSODict.SetVar( "P4PORT", client->GetPort() );
+
+	if ( !SSODict.GetVar( "ssoArgs" ) )
+	    SSODict.SetVar( "ssoArgs", "" );
+	if ( !SSODict.GetVar( "data" ) )
+	    SSODict.SetVar( "data", "" );
+
+	ClientSSO *handler = 0;
+	if( handler = client->GetUi()->GetSSOHandler() )
+	{
+	    StrBuf resBuf;
+
+	    ClientSSOStatus result = handler->Authorize( SSODict,
+	                                                 SSOMAXLENGTH,
+	                                                 resBuf );
+
+	    // Backwards server compatibility
+
+	    if( client->protocolServer < 46 && result == CSS_EXIT)
+	    {
+	        result = CSS_FAIL;
+	        resBuf = "Client aborted SSO";
+	    }
+
+	    switch( result )
+	    {
+	    case CSS_PASS:  client->SetVar( P4Tag::v_status, "pass"  ); break;
+	    case CSS_FAIL:  client->SetVar( P4Tag::v_status, "fail"  ); break;
+	    case CSS_EXIT:  client->SetVar( P4Tag::v_status, "exit"  ); break;
+	    case CSS_UNSET: client->SetVar( P4Tag::v_status, "unset" ); break;
+	    case CSS_SKIP:  goto BuiltInSSO;
+	    }
+
+	    if( result == CSS_EXIT || result == CSS_UNSET)
+	    {
+	        client->SetVar( P4Tag::v_sso );
+	        client->Confirm( confirm );
+	        return;
+	    }
+
+	    // truncate to 128K max length
+
+	    if( resBuf.Length() > SSOMAXLENGTH )
+	    {
+	        resBuf.SetLength( SSOMAXLENGTH );
+	        resBuf.Terminate();
+	    }
+
+	    client->SetVar( P4Tag::v_sso, resBuf );
+
+	    client->Confirm( confirm );
+	    return;
+	}
+
+BuiltInSSO:
 	const StrPtr *loginSSO = &client->GetLoginSSO();
 
 	if( !strcmp( loginSSO->Text(), "unset" ) )
@@ -2587,23 +2658,23 @@ clientSingleSignon( Client *client, Error *e )
 
 	    RunCommandIo *rc = new RunCommandIo;
 	    StrBuf result;
-
 	    RunArgs cmd;
+	    StrBufDict fields;
+	    StrPtr *data;
+	    StrBuf input;
 
-	    StrBufDict SSODict;
-	    StrRef var, val;
-
-	    for( int i = 0; client->GetVar( i, var, val ); i++ )
-	        SSODict.SetVar( var, val );
-
-	    // Allow the trigger to know if it's talking through a broker or proxy
-	    // since the serverAddress will be different in this case.
-
-	    SSODict.SetVar( "P4PORT", client->GetPort() );
+	    // data may be specified as an placeholder or sent to stdin
+	    StrOps::Expand(cmd.SetBuf(), *loginSSO, fields, &fields);
+	    if( !fields.GetVar( "data" ) &&
+		( data = SSODict.GetVar( "data" ) ) )
+	    {
+		input = *data;
+		SSODict.RemoveVar( "data" );
+	    }
 
 	    StrOps::Expand( cmd.SetBuf(), *loginSSO, SSODict );
 
-	    if( rc->Run( cmd, result, e ) || e->Test() )
+	    if( rc->Run( cmd, input, result, e ) || e->Test() )
 	        client->SetVar( P4Tag::v_status, "fail" );
 	    else
 	        client->SetVar( P4Tag::v_status, "pass" );

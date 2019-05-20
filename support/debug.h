@@ -38,6 +38,8 @@ enum P4DebugType {
 	DT_DVCS,	// DVCS related
 	DT_GRAPH,	// GRAPH related
 	DT_GCONN,	// gconn related
+	DT_FOVR,	// Failover related
+	DT_SCRIPT,	// scripting support
 	DT_LAST
 }  ;
 

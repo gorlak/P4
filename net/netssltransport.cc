@@ -1399,13 +1399,17 @@ NetSslTransport::Close( void )
 
 	TRANSPORT_PRINTF( SSLDEBUG_TRANS, "NetSslTransport lastRead=%d", lastRead );
 
+	// Only wait in select a second by default, since it's possible
+	// we'll be in a state where the EOF never comes.
+	const int max = p4tunable.Get( P4TUNE_NET_MAXCLOSEWAIT );
+
 	if( lastRead )
 	{
 	    int  r = 1;
 	    int  w = 0;
 	    char buf[1];
 
-	    if( selector->Select( r, w, -1 ) >= 0 && r )
+	    if( selector->Select( r, w, max ) >= 0 && r )
 		read( t, buf, 1 );
 	}
 
@@ -1441,7 +1445,7 @@ NetSslTransport::Close( void )
 	    int  w = 0;
 	    char buf[1];
 
-	    if( selector->Select( r, w, -1 ) >= 0 && r )
+	    if( selector->Select( r, w, max ) >= 0 && r )
 		read( t, buf, 1 );
 	}
 

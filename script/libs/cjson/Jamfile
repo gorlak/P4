@@ -1,0 +1,6 @@
+SubDir P4 script libs cjson ;
+
+Library $(P4SCRIPT) : lua_cjson.cc ;
+
+# TODO: this could be -O3 as it is in their source Makefile.
+ObjectC++Flags lua_cjson.cc : -I $(P4)/script/lua-5.3 -I $(P4)/script ;

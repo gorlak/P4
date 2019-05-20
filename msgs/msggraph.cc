@@ -22,7 +22,7 @@
  * When adding a new error make sure its greater than the current high
  * value and update the following number:
  *
- * Current high value for a MsgGraph error code is 364
+ * Current high value for a MsgGraph error code is 375
  */
 
 # include <error.h>
@@ -44,20 +44,21 @@ ErrorId MsgGraph::FollowDeletedWildcard = { ErrorOf( ES_GRAPH, 317, E_FAILED, EV
 ErrorId MsgGraph::UseFiles            = { ErrorOf( ES_GRAPH, 224, E_FAILED, EV_USAGE, 0 ), "Usage: %'files [-m max] filespec'%" } ;
 ErrorId MsgGraph::UseFstat            = { ErrorOf( ES_GRAPH, 262, E_FAILED, EV_USAGE, 0 ), "Usage: %'fstat [ -m max ] file...'%" } ;
 ErrorId MsgGraph::UseLock             = { ErrorOf( ES_GRAPH, 246, E_FAILED, EV_USAGE, 0 ), "Usage: %'lock [-c change] file...'%" } ;
-ErrorId MsgGraph::UseLog              = { ErrorOf( ES_GRAPH, 6, E_FAILED, EV_USAGE, 0 ), "Usage: %'log -n repo [ -u user -A date -B date -p -N N -X N ] [ -a | -m N ] [ commit... ]'%" } ;
+ErrorId MsgGraph::UseLog              = { ErrorOf( ES_GRAPH, 6, E_FAILED, EV_USAGE, 0 ), "Usage: %'log -n repo [ -u user -A date -B date -p -N N -X N --oneline ] [ -a | -m N ] [ commit... ]'%" } ;
 ErrorId MsgGraph::UseShowRef          = { ErrorOf( ES_GRAPH, 58, E_FAILED, EV_USAGE, 0 ), "Usage: %'show-ref [ -a -n repo -u user -t type -m N -e|-E filter]'%" } ;
 ErrorId MsgGraph::UseMerge            = { ErrorOf( ES_GRAPH, 7, E_FAILED, EV_USAGE, 0 ), "Usage: %'merge [ -n ] [ --ff-only ] [ --no-ff | --squash ] [ -d description ]  other-branch'%" } ;
 ErrorId MsgGraph::UseMerge2           = { ErrorOf( ES_GRAPH, 330, E_FAILED, EV_USAGE, 0 ), "Usage: %'merge [ -n ] [ --ff-only ] [ --no-ff | --squash ] [ -d description ] --repo repo --target target-branch other-branch'%" } ;
+ErrorId MsgGraph::UseUndo             = { ErrorOf( ES_GRAPH, 369, E_FAILED, EV_USAGE, 0 ), "Usage: %'undo [ -n ] [ -d description ] --repo=//repo/name:target:source0[:sourcen ...]...'%" } ;
 ErrorId MsgGraph::UseRebase           = { ErrorOf( ES_GRAPH, 327, E_FAILED, EV_USAGE, 0 ), "Usage: %'graph rebase [ -r ref -f ] --repo repo --target target source'%" } ;
-ErrorId MsgGraph::UseCherryPick       = { ErrorOf( ES_GRAPH, 328, E_FAILED, EV_USAGE, 0 ), "Usage: %'graph cherry-pick [ -r ref -f ] --repo repo --target target source'%" } ;
-ErrorId MsgGraph::UseOpen             = { ErrorOf( ES_GRAPH, 221, E_FAILED, EV_USAGE, 0 ), "Usage: %'add/edit/delete [-c changelist#] [-f] [-n] [-t type] files...'%" } ;
+ErrorId MsgGraph::UseCherryPick       = { ErrorOf( ES_GRAPH, 328, E_FAILED, EV_USAGE, 0 ), "Usage: %'graph cherry-pick [ -r ref -f --undo ] --repo repo --target target source'%" } ;
+ErrorId MsgGraph::UseOpen             = { ErrorOf( ES_GRAPH, 221, E_FAILED, EV_USAGE, 0 ), "Usage: %'add/edit/delete [-c changelist#] [-f] [-I] [-n] [-t type] files...'%" } ;
 ErrorId MsgGraph::UseTag              = { ErrorOf( ES_GRAPH, 211, E_FAILED, EV_USAGE, 0 ), "Usage: %'tag -n repo [ -d tag | -l [ -m max ] | -c comment | -o ] tag [ sha ]'%" } ;
 ErrorId MsgGraph::UseTags             = { ErrorOf( ES_GRAPH, 335, E_FAILED, EV_USAGE, 0 ), "Usage: %'graph tags [-o] [-m max]'%" } ;
 ErrorId MsgGraph::UseReconcile        = { ErrorOf( ES_GRAPH, 261, E_FAILED, EV_USAGE, 0 ), "Usage: %'reconcile [ -a -e -d -n -c change ]'%" } ;
 ErrorId MsgGraph::UseReopen           = { ErrorOf( ES_GRAPH, 257, E_FAILED, EV_USAGE, 0 ), "Usage: %'reopen [-c changelist#] files...'%" } ;
 ErrorId MsgGraph::UseResolve          = { ErrorOf( ES_GRAPH, 220, E_FAILED, EV_USAGE, 0 ), "Usage: %'resolve'%" } ;
 ErrorId MsgGraph::UseResolved         = { ErrorOf( ES_GRAPH, 244, E_FAILED, EV_USAGE, 0 ), "Usage: %'resolved'%" } ;
-ErrorId MsgGraph::UseRevert           = { ErrorOf( ES_GRAPH, 222, E_FAILED, EV_USAGE, 0 ), "Usage: %'revert [ -n -w -a -c changelist# ] files...'%" } ;
+ErrorId MsgGraph::UseRevert           = { ErrorOf( ES_GRAPH, 222, E_FAILED, EV_USAGE, 0 ), "Usage: %'revert [ -n -w -a -c changelist# -f ] files...'%" } ;
 ErrorId MsgGraph::UseSwitch           = { ErrorOf( ES_GRAPH, 216, E_FAILED, EV_USAGE, 0 ), "Usage: %'switch [-l | [-a|-c|-d|-n repo] branch]'%" } ;
 ErrorId MsgGraph::UseUnlock           = { ErrorOf( ES_GRAPH, 247, E_FAILED, EV_USAGE, 0 ), "Usage: %'unlock [-c change] file...'%" } ;
 ErrorId MsgGraph::UseReceivePack      = { ErrorOf( ES_GRAPH, 59, E_FAILED, EV_USAGE, 0 ), "Usage: %'receive-pack -n repo [-u user -v] -i files... [ -r refs... | -F refs... | -p packed-refs ]'%" } ;
@@ -76,7 +77,7 @@ ErrorId MsgGraph::UseGraphVerify      = { ErrorOf( ES_GRAPH, 132, E_FAILED, EV_U
 ErrorId MsgGraph::UseGraphPackInfo    = { ErrorOf( ES_GRAPH, 284, E_FAILED, EV_USAGE, 0 ), "Usage: %'pack-info -n repo'%" } ;
 ErrorId MsgGraph::UsePermissionG      = { ErrorOf( ES_GRAPH, 110, E_FAILED, EV_USAGE, 0 ), "Usage: %'grant-permission [ -f ] [ -r ref ] -p perm -g group|-u user -d graphdepot|-n //repo/name'%" } ;
 ErrorId MsgGraph::UsePermissionR      = { ErrorOf( ES_GRAPH, 111, E_FAILED, EV_USAGE, 0 ), "Usage: %'revoke-permission [ -f ] [ -r ref ] -p perm -g group|-u user -d graphdepot|-n //repo/name'%" } ;
-ErrorId MsgGraph::UsePermissionS      = { ErrorOf( ES_GRAPH, 112, E_FAILED, EV_USAGE, 0 ), "Usage: %'show-permission [ -r ref ] [ -u user ] [ -g group ] [ -p perm ] -d graphdepot|-n //repo/name'%" } ;
+ErrorId MsgGraph::UsePermissionS      = { ErrorOf( ES_GRAPH, 112, E_FAILED, EV_USAGE, 0 ), "Usage: %'show-permission [ -r ref ] [ -u user | -g group ] [ -p perm ] -d graphdepot|-n //repo/name'%" } ;
 ErrorId MsgGraph::UsePermissions      = { ErrorOf( ES_GRAPH, 334, E_FAILED, EV_USAGE, 0 ), "Usage: %'show-permissions [ -d graphdepot | -n //repo/name ] [ -u user | -g group ]'%" } ;
 ErrorId MsgGraph::UsePermissionC      = { ErrorOf( ES_GRAPH, 113, E_FAILED, EV_USAGE, 0 ), "Usage: %'check-permission -n //repo/name [ -r ref ] -u user -p perm'%" } ;
 ErrorId MsgGraph::UsePermNoRef        = { ErrorOf( ES_GRAPH, 279, E_FAILED, EV_USAGE, 1 ), "Usage: -r (ref) not required for permission '%perm%'" } ;
@@ -93,11 +94,13 @@ ErrorId MsgGraph::ReferenceDataEmpty  = { ErrorOf( ES_GRAPH, 342, E_INFO, EV_NON
 ErrorId MsgGraph::RepositoryData      = { ErrorOf( ES_GRAPH, 70, E_INFO, EV_NONE, 1 ), "%repo%" } ;
 ErrorId MsgGraph::FileLogData         = { ErrorOf( ES_GRAPH, 10, E_INFO, EV_NONE, 4 ), "%depotFile%%depotRev% (%action%) %commit%" } ;
 ErrorId MsgGraph::SubmoduleData       = { ErrorOf( ES_GRAPH, 253, E_INFO, EV_NONE, 3 ), "%repo% %path% %subrepo%" } ;
+ErrorId MsgGraph::SubmoduleDeleted    = { ErrorOf( ES_GRAPH, 373, E_INFO, EV_NONE, 0 ), "submodule deleted" } ;
+ErrorId MsgGraph::SubmoduleUpdated    = { ErrorOf( ES_GRAPH, 374, E_INFO, EV_NONE, 0 ), "submodule updated" } ;
 ErrorId MsgGraph::WrongClientType     = { ErrorOf( ES_GRAPH, 11, E_FAILED, EV_USAGE, 1 ), "A client of this type may not have a view that includes %depotFile%" } ;
 ErrorId MsgGraph::NotSupported        = { ErrorOf( ES_GRAPH, 241, E_FAILED, EV_USAGE, 0 ), "This operation is not supported for clients of type 'graph'." } ;
 ErrorId MsgGraph::CmdNotSupported     = { ErrorOf( ES_GRAPH, 249, E_FAILED, EV_USAGE, 1 ), "'p4 %cmd%' is not supported when using a graph type client." } ;
 ErrorId MsgGraph::CurrentBranchShort  = { ErrorOf( ES_GRAPH, 12, E_INFO, EV_NONE, 2 ), "%depot% %branchName%" } ;
-ErrorId MsgGraph::DetachedHead        = { ErrorOf( ES_GRAPH, 227, E_INFO, EV_NONE, 1 ), "%repoName% DETACHED HEAD" } ;
+ErrorId MsgGraph::DetachedHead        = { ErrorOf( ES_GRAPH, 227, E_INFO, EV_NONE, 3 ), "%repoName% %client% %sha% DETACHED HEAD" } ;
 ErrorId MsgGraph::ReferenceHeadShort  = { ErrorOf( ES_GRAPH, 13, E_INFO, EV_NONE, 3 ), "%depot% %client% %sha%" } ;
 ErrorId MsgGraph::ReferenceHaveShort  = { ErrorOf( ES_GRAPH, 14, E_INFO, EV_NONE, 3 ), "%depot% %client% %sha%" } ;
 ErrorId MsgGraph::RepoDefaultBranch   = { ErrorOf( ES_GRAPH, 117, E_INFO, EV_NONE, 2 ), "%repo% %branch% HEAD" } ;
@@ -267,11 +270,12 @@ ErrorId MsgGraph::SyncNotFastForward  = { ErrorOf( ES_GRAPH, 233, E_FAILED, EV_U
 ErrorId MsgGraph::SyncUnknownBranch   = { ErrorOf( ES_GRAPH, 234, E_FATAL, EV_FAULT, 0 ), "Client has opened files, but is on an unknown branch." } ;
 ErrorId MsgGraph::CommitSummary       = { ErrorOf( ES_GRAPH, 236, E_INFO, EV_NONE, 4 ), "Commit: %sha%\nAuthor: %authorName%\nDate: %authorDate%\nDescription: %description%\n" } ;
 ErrorId MsgGraph::NoMergeOpenFiles    = { ErrorOf( ES_GRAPH, 237, E_FAILED, EV_USAGE, 0 ), "Merge not allowed: workspace has opened files." } ;
-ErrorId MsgGraph::FastForwardMerge    = { ErrorOf( ES_GRAPH, 238, E_INFO, EV_NONE, 3 ), "Fast-forward merge of branch %branchName% to commit %sha%[ in repo %repo%]." } ;
+ErrorId MsgGraph::FastForwardMerge    = { ErrorOf( ES_GRAPH, 238, E_INFO, EV_NONE, 4 ), "Fast-forward merge change %change% of branch %branchName% to commit %sha%[ in repo %repo%]." } ;
 ErrorId MsgGraph::MergePreview        = { ErrorOf( ES_GRAPH, 291, E_INFO, EV_NONE, 3 ), "%action% of branch %branchName% would succeed[ in repo %repo%]." } ;
 ErrorId MsgGraph::BranchNotFound      = { ErrorOf( ES_GRAPH, 240, E_FAILED, EV_USAGE, 1 ), "Branch %branchName% not found." } ;
 ErrorId MsgGraph::ManyReposUseAll     = { ErrorOf( ES_GRAPH, 308, E_FAILED, EV_USAGE, 0 ), "Multiple repos mapped by client; use -n to specify a single repo or -a for all." } ;
-ErrorId MsgGraph::MergeComplete       = { ErrorOf( ES_GRAPH, 242, E_INFO, EV_NONE, 1 ), "Merge completed as %sha%[ in repo %repo%]." } ;
+ErrorId MsgGraph::MergeComplete       = { ErrorOf( ES_GRAPH, 242, E_INFO, EV_NONE, 3 ), "Merge change %change% completed as %sha%[ in repo %repo%]." } ;
+ErrorId MsgGraph::UndoComplete        = { ErrorOf( ES_GRAPH, 371, E_INFO, EV_NONE, 3 ), "Undo change %change% completed as %sha%[ in repo %repo%]." } ;
 ErrorId MsgGraph::CherryPickComplete  = { ErrorOf( ES_GRAPH, 326, E_INFO, EV_NONE, 1 ), "Cherry-pick completed as %sha%[ in repo %repo%]." } ;
 ErrorId MsgGraph::NoChangeFixes       = { ErrorOf( ES_GRAPH, 243, E_FAILED, EV_USAGE, 1 ), "Change %change% has fixes attached, and therefore may not be submitted." } ;
 ErrorId MsgGraph::UnsupportedFileType = { ErrorOf( ES_GRAPH, 248, E_FAILED, EV_USAGE, 1 ), "File type %fileType% is not currently supported." } ;
@@ -280,6 +284,7 @@ ErrorId MsgGraph::ChangeViewFuture    = { ErrorOf( ES_GRAPH, 251, E_FAILED, EV_U
 ErrorId MsgGraph::SubmoduleOpen       = { ErrorOf( ES_GRAPH, 254, E_FAILED, EV_USAGE, 2 ), "In repo %repo%, file %depotFile% is part of a submodule and therefore must be modified in the submodule, not in this repo." } ;
 ErrorId MsgGraph::UnknownRefType      = { ErrorOf( ES_GRAPH, 256, E_FAILED, EV_USAGE, 1 ), "Reference type %refType% unrecognized." } ;
 ErrorId MsgGraph::CommitFileLog       = { ErrorOf( ES_GRAPH, 260, E_INFO, EV_NONE, 5 ), "commit %sha%\n[Merge: %merge%\n]Author: %author%\nDate: %date%\n%description%\n" } ;
+ErrorId MsgGraph::CommitFileLogOneline = { ErrorOf( ES_GRAPH, 367, E_INFO, EV_NONE, 2 ), "%sha% %description%" } ;
 ErrorId MsgGraph::CantUpgradePackDir  = { ErrorOf( ES_GRAPH, 264, E_INFO, EV_NONE, 1 ), "Failed to rename archive for repo %repo%." } ;
 ErrorId MsgGraph::NoMatchingRepos     = { ErrorOf( ES_GRAPH, 265, E_FAILED, EV_USAGE, 1 ), "%spec% - No matching repos." } ;
 ErrorId MsgGraph::InvalidRevSpec      = { ErrorOf( ES_GRAPH, 266, E_FAILED, EV_USAGE, 1 ), "Unexpected argument syntax[ - %revSpec%]" } ;
@@ -298,7 +303,7 @@ ErrorId MsgGraph::GraphNotCompat      = { ErrorOf( ES_GRAPH, 280, E_FAILED, EV_U
 ErrorId MsgGraph::InvalidDefaultBranch = { ErrorOf( ES_GRAPH, 285, E_INFO, EV_USAGE, 1 ), "DefaultBranch '%defaultbranch%' must begin with \"refs/\" if git is to use it." } ;
 ErrorId MsgGraph::LsTree              = { ErrorOf( ES_GRAPH, 286, E_INFO, EV_NONE, 4 ), "%mode% %type% %sha%\t%path%" } ;
 ErrorId MsgGraph::LsTreeNameOnly      = { ErrorOf( ES_GRAPH, 287, E_INFO, EV_NONE, 4 ), "%path%" } ;
-ErrorId MsgGraph::MergeConflict       = { ErrorOf( ES_GRAPH, 288, E_FAILED, EV_USAGE, 1 ), "Merge failed, conflict detected for '%depotFile%'" } ;
+ErrorId MsgGraph::MergeConflict       = { ErrorOf( ES_GRAPH, 288, E_FAILED, EV_USAGE, 1 ), "Merge failed, conflict detected[ for '%depotFile%']." } ;
 ErrorId MsgGraph::MergeNotText        = { ErrorOf( ES_GRAPH, 289, E_FAILED, EV_USAGE, 1 ), "Merge failed, non-textual file '%depotFile%'" } ;
 ErrorId MsgGraph::MergeSkippedResolve = { ErrorOf( ES_GRAPH, 300, E_FAILED, EV_USAGE, 0 ), "Merge failed, some file(s) were skipped in interactive resolve." } ;
 ErrorId MsgGraph::LFSDisabled         = { ErrorOf( ES_GRAPH, 293, E_FAILED, EV_FAULT, 1 ), "Import of LFS objects is disabled for '%repo%'." } ;
@@ -308,7 +313,7 @@ ErrorId MsgGraph::RepoIndexNone       = { ErrorOf( ES_GRAPH, 296, E_FAILED, EV_U
 ErrorId MsgGraph::RepoIndexSuccess    = { ErrorOf( ES_GRAPH, 297, E_INFO, EV_NONE, 3 ), "'%repo%' - index created, %commits% commit(s), %files% file(s)." } ;
 ErrorId MsgGraph::NoRepoEdgeSubmit    = { ErrorOf( ES_GRAPH, 304, E_FAILED, EV_NONE, 0 ), "Cannot submit using a graph client on edge replica." } ;
 ErrorId MsgGraph::MirrorMissingFile   = { ErrorOf( ES_GRAPH, 305, E_FAILED, EV_NONE, 1 ), "Mirrored repo '%repo%' is missing some LFS files. Mirroring does not support LFS files.\n'%file%' missing LFS object." } ;
-ErrorId MsgGraph::NoWriteForRef       = { ErrorOf( ES_GRAPH, 306, E_FAILED, EV_FAULT, 2 ), "%file% - no write permission on %ref% reference." } ;
+ErrorId MsgGraph::NoWriteForRef       = { ErrorOf( ES_GRAPH, 306, E_FAILED, EV_FAULT, 2 ), "%file% - no write permission[ on %ref% reference]." } ;
 ErrorId MsgGraph::RepoSwitchChanged   = { ErrorOf( ES_GRAPH, 309, E_INFO, EV_NONE, 3 ), "%depot% changed branch from %orig% to %name%" } ;
 ErrorId MsgGraph::RepoAlreadyOnBranch = { ErrorOf( ES_GRAPH, 310, E_INFO, EV_NONE, 2 ), "%depot% is already on branch %name%" } ;
 ErrorId MsgGraph::RepoSwitchMissing   = { ErrorOf( ES_GRAPH, 311, E_INFO, EV_NONE, 3 ), "%depot% has no branch %name%, will remain on branch %orig%" } ;
@@ -320,10 +325,10 @@ ErrorId MsgGraph::HeadChanged         = { ErrorOf( ES_GRAPH, 316, E_FAILED, EV_N
 ErrorId MsgGraph::SubmitCompleteWithRepo = { ErrorOf( ES_GRAPH, 318, E_INFO, EV_NONE, 3 ), "%change% renamed %commitSha% and submitted on %repo%." } ;
 ErrorId MsgGraph::LbrPackCacheRequiresServerLocks = { ErrorOf( ES_GRAPH, 319, E_FAILED, EV_NONE, 0 ), "Internal error: LbrPackCache passed NULL serverLocks" } ;
 ErrorId MsgGraph::Rebased             = { ErrorOf( ES_GRAPH, 320, E_INFO, EV_NONE, 5 ), "Rebased %baseSha% to %srcSha% onto %dstSha% to create %newSha% in repo %repo%." } ;
-ErrorId MsgGraph::RebasedNoop         = { ErrorOf( ES_GRAPH, 356, E_INFO, EV_NONE, 2 ), "The target and base commits are the same - '%baseSha%'. Nothing to do." } ;
+ErrorId MsgGraph::RebasedNoop         = { ErrorOf( ES_GRAPH, 356, E_INFO, EV_NONE, 2 ), "Current branch[ %branch%] is up to date." } ;
 ErrorId MsgGraph::CherryPicked        = { ErrorOf( ES_GRAPH, 321, E_INFO, EV_NONE, 4 ), "Cherry picked %srcSha% onto %dstSha% to create %newSha% in repo %repo%." } ;
 ErrorId MsgGraph::CherryPickedNoop      = { ErrorOf( ES_GRAPH, 357, E_INFO, EV_NONE, 2 ), "The target and cherry-pick commits are the same - '%baseSha%'. Nothing to do." } ;
-ErrorId MsgGraph::RefUpdated          = { ErrorOf( ES_GRAPH, 322, E_INFO, EV_NONE, 2 ), "Reference %branch% updated to %newSha%" } ;
+ErrorId MsgGraph::RefUpdated          = { ErrorOf( ES_GRAPH, 322, E_INFO, EV_NONE, 2 ), "Change %change% reference %branch% updated to %newSha%" } ;
 ErrorId MsgGraph::BadMergeMode        = { ErrorOf( ES_GRAPH, 323, E_FAILED, EV_UNKNOWN, 0 ), "Can't merge and cherry-pick at the same time!" } ;
 ErrorId MsgGraph::BadSource           = { ErrorOf( ES_GRAPH, 324, E_FAILED, EV_UNKNOWN, 2 ), "Source '%commitish%' not found in %repo%." } ;
 ErrorId MsgGraph::BadTarget           = { ErrorOf( ES_GRAPH, 325, E_FAILED, EV_UNKNOWN, 2 ), "Target '%commitish%' not found in %repo%." } ;
@@ -348,11 +353,17 @@ ErrorId MsgGraph::RepoHasOpened       = { ErrorOf( ES_GRAPH, 351, E_FAILED, EV_N
 ErrorId MsgGraph::BranchNotMerged     = { ErrorOf( ES_GRAPH, 352, E_FAILED, EV_NONE, 2 ), "Branch %branch% in repo %repo% not merged to default branch. Use -f to force deletion." } ;
 ErrorId MsgGraph::DefBranchForceDel   = { ErrorOf( ES_GRAPH, 353, E_FAILED, EV_NONE, 2 ), "Default Branch %branch% cannot be deleted without using -f to force deletion." } ;
 ErrorId MsgGraph::Resolve3WayText     = { ErrorOf( ES_GRAPH, 354, E_INFO, EV_NONE, 3 ), "%localpath% - merging %fromFile% %fromSha%" } ;
+ErrorId MsgGraph::Resolve2WayRaw      = { ErrorOf( ES_GRAPH, 375, E_INFO, EV_NONE, 3 ), "%localpath% - vs %fromFile% %fromSha%" } ;
 ErrorId MsgGraph::SubmitBadState      = { ErrorOf( ES_GRAPH, 358, E_FAILED, EV_NONE, 1 ), "Protocol error during graph submit for %repo%." } ;
 ErrorId MsgGraph::SubmitBadStateFiles = { ErrorOf( ES_GRAPH, 359, E_FAILED, EV_NONE, 3 ), "Missing file transfer message during graph submit. Expected %exp% Observed %obs% for repo %repo%." } ;
-ErrorId MsgGraph::MergeOutOfView      = { ErrorOf( ES_GRAPH, 360, E_FAILED, EV_NONE, 2 ), "A conflicting file is not in view %list%" } ;
+ErrorId MsgGraph::MergeOutOfView      = { ErrorOf( ES_GRAPH, 360, E_FAILED, EV_NONE, 1 ), "A file that requires merging is not in view %list%" } ;
 ErrorId MsgGraph::HaveSpecificNoRev   = { ErrorOf( ES_GRAPH, 361, E_FAILED, EV_NONE, 1 ), "Cannot edit file %depotfile%, client has a file specific revision that is not in revision table (see p4 have), consider using sync -f to update" } ;
-ErrorId MsgGraph::NotOnReplica        = { ErrorOf( ES_GRAPH, 362, E_FAILED, EV_NONE, 0 ), "Cannot create or delete a branch using a graph client on edge replica." } ;
+ErrorId MsgGraph::NotOnReplica        = { ErrorOf( ES_GRAPH, 366, E_FAILED, EV_NONE, 0 ), "Cannot create or delete a branch using a graph client on edge replica." } ;
+ErrorId MsgGraph::ReferenceHaveComb   = { ErrorOf( ES_GRAPH, 365, E_INFO, EV_NONE, 4 ), "%depot% %client% %ssha% %branchName%" } ;
+ErrorId MsgGraph::WarnNoWriteAccess   = { ErrorOf( ES_GRAPH, 368, E_WARN, EV_NONE, 1 ), "Warning: you do not have write access for %file%." } ;
+ErrorId MsgGraph::BadParentNumber     = { ErrorOf( ES_GRAPH, 370, E_FAILED, EV_NONE, 1 ), "Merge parentNumber out of range: %parentNumber%." } ;
+ErrorId MsgGraph::RefTagUpdateNoForce = { ErrorOf( ES_GRAPH, 372, E_FAILED, EV_NONE, 1 ), "Reference %refname% already exists! The force flag must be specified to update the reference." } ;
+
 
 // ErrorId graveyard: retired/deprecated ErrorIds. 
 

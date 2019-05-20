@@ -390,3 +390,215 @@ ObjectHashMapIterator::Next( Sha1 &sha, void **object )
         }
     }
 }
+
+/***********************************************************************/
+
+ObjectHashShaModeTableEntry::ObjectHashShaModeTableEntry()
+{
+	this->mode = DTM_TREE;
+}
+
+void *
+ObjectHashShaModeMap::Get( const Sha1 &sha, ObjGraphMode mode )
+{
+	return Get( sha.data, mode );
+}
+
+void *
+ObjectHashShaModeMap::Get( const unsigned char *sha, ObjGraphMode mode )
+{
+	ObjectHashBucket *b = Bucket( sha );
+	ObjectHashShaModeTableEntry *hte = 
+	                (ObjectHashShaModeTableEntry *)b->head;
+
+	while( hte )
+	{
+	    int cmp = hte->Compare( sha );
+
+	    if( !cmp )
+	        if( hte->mode == mode )
+	            return hte->object;
+	    if( cmp > 0 )
+	        return 0;
+	    hte = (ObjectHashShaModeTableEntry *)hte->next;
+	}
+	return 0;
+}
+
+int
+ObjectHashShaModeMap::Put( const Sha1 &sha, ObjGraphMode mode, void *object )
+{
+	if( numObjects >= MAX_OBJECTS )
+	    return 0;
+
+	ObjectHashBucket *b = Bucket( sha );
+	ObjectHashShaModeTableEntry *hte = 
+	                (ObjectHashShaModeTableEntry *)b->head;
+	ObjectHashShaModeTableEntry *last = 0;
+
+	while( hte )
+	{
+	    int cmp = hte->Compare( sha );
+
+	    if( !cmp && hte->mode == mode )
+	        return 0; // already exists, can't add
+
+	    if( cmp >= 0 )
+	    {
+	        // The new object goes immediately before this one:
+
+	        ObjectHashShaModeTableEntry *e = 
+	                    new ObjectHashShaModeTableEntry;
+	        e->sha1 = sha;
+	        e->mode = mode;
+	        e->object = object;
+	        e->next = hte;
+	        e->prev = hte->prev;
+	        if( !last )
+	            b->head = e;
+	        else
+	            last->next = e;
+	        hte->prev = e;
+	        CheckForResize();
+	        return 1;
+	    }
+	    last = hte;
+	    hte = (ObjectHashShaModeTableEntry *)hte->next;
+	}
+	// The new object goes at the end of the chain:
+
+	ObjectHashShaModeTableEntry *e = new ObjectHashShaModeTableEntry;
+	e->sha1 = sha;
+	e->mode = mode;
+	e->object = object;
+	e->next = 0;
+	e->prev = last;
+	if( !last )
+	    b->head = e;
+	else
+	    last->next = e;
+	CheckForResize();
+
+	return 1;
+}
+
+void *
+ObjectHashShaModeMap::Remove( const Sha1 &sha, ObjGraphMode mode )
+{
+	ObjectHashBucket *b = Bucket( sha );
+	ObjectHashShaModeTableEntry *hte = 
+	                (ObjectHashShaModeTableEntry *)b->head;
+
+	while( hte )
+	{
+	    int cmp = hte->Compare( sha );
+
+	    if( !cmp && hte->mode == mode )
+	    {
+	        void *result = hte->object;
+	        if( hte->next )
+	            hte->next->prev = hte->prev;
+	        if( hte->prev )
+	            hte->prev->next = hte->next;
+	        else
+	            b->head = hte->next;
+	        delete hte;
+	        numObjects--;
+	        return result;
+	    }
+
+	    if( cmp > 0 )
+	        return 0;
+	    hte = (ObjectHashShaModeTableEntry *)hte->next;
+	}
+	return 0;
+}
+
+void
+ObjectHashShaModeMap::PutInNewTable(
+	ObjectHashShaModeTableEntry *o,
+	ObjectHashBucket *newTable,
+	int newSize )
+{
+	ObjectHashBucket *b = Bucket( newSize, newTable, o->sha1.data );
+
+	ObjectHashShaModeTableEntry *hte = 
+	                (ObjectHashShaModeTableEntry *)b->head;
+	ObjectHashTableEntry *last = 0;
+
+	while( hte )
+	{
+	    int cmp = hte->Compare( o->sha1 );
+
+	    if( !cmp && hte->mode == o->mode )
+	        return; // (can't happen, since old table contained no dups)
+
+	    if( cmp >= 0 )
+	    {
+	        // The new object goes immediately before this one:
+
+	        ObjectHashShaModeTableEntry *e = 
+	                    new ObjectHashShaModeTableEntry;
+	        e->sha1 = o->sha1;
+	        e->mode = o->mode;
+	        e->object = o->object;
+	        e->next = hte;
+	        e->prev = hte->prev;
+	        if( !last )
+	            b->head = e;
+	        else
+	            last->next = e;
+	        hte->prev = e;
+	        return;
+	    }
+	    last = hte;
+	    hte = (ObjectHashShaModeTableEntry *)hte->next;
+	}
+
+	// The new object goes at the end of the chain:
+	ObjectHashShaModeTableEntry *e = new ObjectHashShaModeTableEntry;
+	e->sha1 = o->sha1;
+	e->mode = o->mode;
+	e->object = o->object;
+	e->next = 0;
+	e->prev = last;
+	if( !last )
+	    b->head = e;
+	else
+	    last->next = e;
+}
+
+void
+ObjectHashShaModeMap::PutInNewTable(
+	ObjectHashTableEntry *o,
+	ObjectHashBucket *newTable,
+	int newSize )
+{
+	ObjectHashShaModeTableEntry *osm = (ObjectHashShaModeTableEntry *)o;
+	PutInNewTable( osm, newTable, newSize );
+}
+
+void *
+ObjectHashShaModeMap::Get( const unsigned char *sha )
+{
+	return NULL;
+}
+
+void *
+ObjectHashShaModeMap::Get( const Sha1 &sha )
+{
+	return NULL;
+}
+
+int
+ObjectHashShaModeMap::Put( const Sha1 &sha, void *object )
+{
+	return 0;
+}
+
+void *
+ObjectHashShaModeMap::Remove( const Sha1 &sha )
+{
+	return NULL;
+}
+

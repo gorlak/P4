@@ -1,0 +1,5 @@
+SubDir p4 script libs ;
+
+SubInclude p4 script libs cjson ;
+SubInclude p4 script libs lua-curlv3 ;
+SubInclude p4 script libs cURL ;

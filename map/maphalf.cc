@@ -289,6 +289,30 @@ MapHalf::Validate( MapHalf *item, Error *e )
 	}
 }
 
+
+void
+MapHalf::SanitizeStars( Error *e )
+{
+	if( !isWild )
+	    return;
+
+	StrBuf tmp;
+
+	int wilds = 0;
+	MapChar *mc = mapChar;
+	while( mc->cc != cEOS )
+	{
+	    if( mc->IsWild() )
+	        mc->MakeParam( tmp, mc, wilds );
+	    else
+	        tmp.Extend( mc->c );
+	    mc++;
+	}
+	tmp.Terminate();
+	
+	*this = tmp;
+}
+
 void
 MapHalf::SetCaseMode( int caseMode )
 {

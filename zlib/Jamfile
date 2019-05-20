@@ -1,7 +1,7 @@
 SubDir P4 zlib ;
 
 local  CCFLAGS = $(CCFLAGS) [ FDefines Z_PREFIX ] ;
-local C++FLAGS = $(CCFLAGS) [ FDefines Z_PREFIX ] ;
+local C++FLAGS = $(C++FLAGS) [ FDefines Z_PREFIX ] ;
 
 P4Library $(SUPPORTLIB) : 
 	adler32.c

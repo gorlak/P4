@@ -168,8 +168,7 @@ class RunCommand {
 
 	void	SetAbandon() { abandon = true; }
 	int	WaitChild();
-
-    // NT only!  no-op on all other platforms
+	void	StopChild();
 	bool    PollChild(unsigned long millisecs) const;
 
     private:

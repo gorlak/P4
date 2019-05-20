@@ -190,7 +190,7 @@ RcsParse::SetError( Error *e )
 RcsToken
 RcsParse::Token( Error *e )
 {
-	register ReadFile * const rf = file;
+	ReadFile * const rf = file;
 
 	/* suck up whitespace */
 

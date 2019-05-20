@@ -28,7 +28,7 @@
 # include "macfile.h"
 # include "fileio.h"
 # include "signaler.h"
-
+#include <debug.h>
 # ifdef OS_NT
 # include "windows.h"
 extern int nt_islink( StrPtr *fname, DWORD *dwFlags, int dounicode, int lfn );
@@ -348,7 +348,10 @@ FileSys::PurgeDir( const char *dir, Error *e )
 	if( !e->Test() )
 	{
 	    f->Set( dir );
-	    rmdir( f->Name() );
+	    f->Chmod( FPM_RW, e );
+
+	    if( rmdir( f->Name() ) < 0 )
+	        e->Sys( "rmdir", strerror( errno ) );
 	}
 	delete f;
 }

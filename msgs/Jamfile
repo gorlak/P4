@@ -12,6 +12,7 @@ P4Library $(SUPPORTLIB) :
 	msglbr.cc
 	msgos.cc
 	msgrpc.cc
+	msgscript.cc
 	msgserver.cc
 	msgsupp.cc
 	msghelp.cc

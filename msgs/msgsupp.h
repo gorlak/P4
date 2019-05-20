@@ -29,6 +29,9 @@ class MsgSupp {
 
 	static ErrorId NoParm;
 
+	static ErrorId CodeNotFound;
+	static ErrorId BadListIndex;
+
 	static ErrorId NoUnixReg;
 	static ErrorId NoSuchVariable;
 	static ErrorId HidesVar;
@@ -335,6 +338,24 @@ class MsgSupp {
 	static ErrorId OptionRetry;
 	static ErrorId OptionReference;
 	static ErrorId OptionPerm;
+	static ErrorId OptionFirstParent;
+	static ErrorId OptionIndex;
+	static ErrorId OptionGraph;
+	static ErrorId OptionOneParent;
+	static ErrorId OptionOneline;
+	static ErrorId OptionMerges;
+	static ErrorId OptionForceFailover;
+	static ErrorId OptionIgnoreMaster;
+	static ErrorId OptionRequireMaster;
+	static ErrorId OptionFailoverYes;
+	static ErrorId OptionFailoverid;
+	static ErrorId OptionFailoverQuiesce;
+	static ErrorId OptionFailoverVerification;
+	static ErrorId OptionInstall;
+	static ErrorId OptionCreateSampleExt;
+	static ErrorId OptionUndo;
+	static ErrorId OptionParentNumber;
+	static ErrorId OptionPkgExtension;
 
 	static ErrorId TooManyLockTrys;
 
@@ -344,6 +365,10 @@ class MsgSupp {
 	static ErrorId JsmnBadSyn;
 	static ErrorId JsmnTooFew;
 	static ErrorId JsmnKeyNotFound;
+	static ErrorId ManifestKeyNotFound;
+	static ErrorId ManifestValueEmpty;
+	static ErrorId ManifestValueTypeInvalid;
+	static ErrorId InvalidIntegerRange;
 
 	// Retired ErrorIds. We need to keep these so that clients 
 	// built with newer apis can commnunicate with older servers 

@@ -148,7 +148,7 @@ FileSys::ScanDir( Error *e )
 	struct XABDAT xab;
 	char esa[256];
 	char filename[256];
-	register int status;
+	int status;
 
 	/* Now enter contents of directory */
 

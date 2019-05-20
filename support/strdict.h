@@ -48,6 +48,10 @@ class StrDict {
 
 	void	SetVar( const char *var );
 	void	SetVar( const char *var, int value );
+# ifdef HAVE_INT64
+	void	SetVar( const char *var, long value );
+	void	SetVar( const char *var, P4INT64 value );
+# endif
 	void	SetVar( const char *var, const char *value );
 	void	SetVar( const char *var, const StrPtr *value );
 	void	SetVar( const char *var, const StrPtr &value );

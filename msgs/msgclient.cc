@@ -18,7 +18,7 @@
  * When adding a new error make sure its greater than the current high
  * value and update the following number:
  *
- * Current high value for a MsgClient error code is: 88
+ * Current high value for a MsgClient error code is: 89
  */
 
 # include <error.h>
@@ -115,6 +115,7 @@ ErrorId MsgClient::AliasSyntaxError    = { ErrorOf( ES_CLIENT, 85, E_FAILED, EV_
 ErrorId MsgClient::CommandNotAliased   = { ErrorOf( ES_CLIENT, 86, E_FAILED, EV_USAGE, 1 ), "There is no alias which applies to '%cmd%'." };
 ErrorId MsgClient::AliasEmptyPattern   = { ErrorOf( ES_CLIENT, 87, E_FAILED, EV_USAGE, 1 ), "Alias syntax error: no pattern found in '%alias%'" };
 ErrorId MsgClient::NoModifiedFile      = { ErrorOf( ES_CLIENT, 88, E_FAILED, EV_CLIENT, 2 ), "Can't %action% modified file %file%" };
+ErrorId MsgClient::DevErr              = { ErrorOf( ES_CLIENT, 89, E_FATAL, EV_CLIENT, 1 ), "Programming error:  %err%" };
 
 // ErrorId graveyard: retired/deprecated ErrorIds.
 

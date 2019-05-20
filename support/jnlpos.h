@@ -73,6 +73,16 @@ public:
 	}
 
 	inline
+	bool
+	IsPosMax() const
+	{
+	    const JnlPos PosMax = JnlPos( POS_MAX );
+
+	    return journalNumber == PosMax.GetJnlNum() &&
+		journalOffset == PosMax.GetJnlOffset();
+	}
+
+	inline
 	JnlPos &
 	operator=( const JnlPos &rhs )
 	{
@@ -104,6 +114,15 @@ public:
 
 	void
 	Parse( const StrPtr &txt );
+
+	const StrPtr &
+	Fmt( StrBuf &buf );
+
+	bool
+	GetVar( StrDict *dict, const char *tagNum, const char *tagSequence );
+
+	void
+	SetVar( StrDict *dict, const char *tagNum, const char *tagSequence );
 
 private:
 	int	journalNumber;

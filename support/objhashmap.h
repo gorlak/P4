@@ -58,6 +58,17 @@
  * STRUCTURE! IT IS ENTIRELY UNSYNCHRONIZED AND NOT THREAD SAFE!
  */
 
+/*
+ * Keep this inline with DmtTreeMode::GraphMode
+ */
+typedef enum ObjGraphMode {
+    DTM_NORMAL_FILE     = 0100644,
+    DTM_EXECUTABLE_FILE = 0100755,
+    DTM_SYMLINK         = 0120000,
+    DTM_GITLINK         = 0160000,
+    DTM_TREE            = 040000
+} ObjGraphMode;
+
 class ObjectHashTableEntry
 {
     public:
@@ -104,18 +115,18 @@ class ObjectHashMap
     int            Contains( const Sha1 &sha );
     int            Contains( const unsigned char * );
 
-    void            *Get( const Sha1 &sha );
-    void            *Get( const unsigned char * );
+    virtual void            *Get( const Sha1 &sha );
+    virtual void            *Get( const unsigned char * );
 
-    int            Put( const Sha1 &sha, void *object );
+    virtual int            Put( const Sha1 &sha, void *object );
 
-    void            *Remove( const Sha1 &sha );
+    virtual void            *Remove( const Sha1 &sha );
 
     int            Size();
 
 	void		DumpSummary();
 
-    private:
+    protected:
 
     void            CheckForResize();
 
@@ -128,7 +139,7 @@ class ObjectHashMap
 	                                ObjectHashBucket *table,
 	                                const unsigned char *sha );
 
-    void            PutInNewTable(
+    virtual void   PutInNewTable(
                                 ObjectHashTableEntry *o,
                                 ObjectHashBucket *newTable,
                                 int newSize );
@@ -163,5 +174,47 @@ class ObjectHashMapIterator
     ObjectHashMap        *map;
     ObjectHashTableEntry    *entry;
     int            bucketNo;
+} ;
+
+class ObjectHashShaModeTableEntry : public ObjectHashTableEntry
+{
+    public:
+
+	ObjectHashShaModeTableEntry(void);
+
+	ObjGraphMode              mode;
+
+} ;
+
+class ObjectHashShaModeMap : public ObjectHashMap
+{
+    public:
+
+    void            *Get( const Sha1 &sha, const ObjGraphMode mode );
+    void            *Get( const unsigned char *, ObjGraphMode mode );
+    int              Put( const Sha1 &sha, const ObjGraphMode mode, 
+	                    void *object );
+    void            *Remove( const Sha1 &sha, const ObjGraphMode mode );
+
+    void            *Get( const Sha1 &sha );
+    void            *Get( const unsigned char * );
+
+    int              Put( const Sha1 &sha, void *object );
+
+    void            *Remove( const Sha1 &sha );
+
+    protected:
+    void            PutInNewTable(
+                                ObjectHashTableEntry *o,
+                                ObjectHashBucket *newTable,
+                                int newSize );
+
+    void            PutInNewTable(
+                                ObjectHashShaModeTableEntry *o,
+                                ObjectHashBucket *newTable,
+                                int newSize );
+
+    friend class ObjectHashMapIterator;
+
 } ;
 

@@ -214,6 +214,7 @@ class MsgDm {
 	static ErrorId RmtAuthFailed;
 	static ErrorId ServiceUserLogin;
 	static ErrorId RmtSequenceFailed;
+	static ErrorId RmtUpdFoverSeenFailed;
 	static ErrorId OutOfSequence;
 	static ErrorId ChangeExists;
 	static ErrorId RmtJournalWaitFailed;
@@ -291,8 +292,9 @@ class MsgDm {
 	static ErrorId NoSuchProperty;
 	static ErrorId BadSequence;
 	static ErrorId ExPROPERTY;
-
+	
 	static ErrorId ConfigData;
+	static ErrorId ConfigDataS;
 	static ErrorId NoSuchConfig;
 	static ErrorId ConfigWasNotSet;
 	static ErrorId UseConfigure;
@@ -318,6 +320,7 @@ class MsgDm {
 	static ErrorId DepotSpecDup;
 	static ErrorId DepotTypeDup;
 	static ErrorId DepotUnloadDup;
+	static ErrorId DepotExtensionDup;
 	static ErrorId NoDepotTypeChange;
 	static ErrorId DepotMapInvalid;
 	static ErrorId DepotNotStream;
@@ -360,10 +363,14 @@ class MsgDm {
 	static ErrorId NoSuchServer;
 	static ErrorId ServersData;
 	static ErrorId ServerTypeMismatch;
+	static ErrorId ServerRplFromMandatory;
+	static ErrorId ServerRplFromRplOnly;
+	static ErrorId ServerRplFromSame;
 	static ErrorId ServerViewMap;
 	static ErrorId FiltersReplicaOnly;
 	static ErrorId ServerConfigUsage;
 	static ErrorId ServerConfigInvalidVar;
+	static ErrorId ServerConfigMustBeSet;
 	static ErrorId ServerConfigRO;
 	static ErrorId ServerCantConfig;
 	static ErrorId ServerSvcInvalid;
@@ -440,6 +447,7 @@ class MsgDm {
 	static ErrorId IntegIntoReadOnlyAndMap;
 	static ErrorId IntegIntoReadOnlyCMap;
 	static ErrorId IntegXOpened;
+	static ErrorId IntegXOpenedWarn;
 	static ErrorId IntegBadAncestor;
 	static ErrorId IntegBadBase;
 	static ErrorId IntegBadAction;
@@ -530,6 +538,7 @@ class MsgDm {
 	static ErrorId OpenReadOnlyCMap;
 	static ErrorId OpenXOpened;
 	static ErrorId OpenXOpenedFailed;
+	static ErrorId OpenXOpenedWarn;
 	static ErrorId OpenBadAction;
 	static ErrorId OpenBadClient;
 	static ErrorId OpenBadUser;
@@ -879,6 +888,7 @@ class MsgDm {
 
 	static ErrorId NotUnderRoot;
 	static ErrorId NotUnderClient;
+	static ErrorId FailedToMap;
 
 	static ErrorId CommandCancelled;
 	static ErrorId MaxResults;
@@ -899,6 +909,9 @@ class MsgDm {
 	static ErrorId EmbEllipse;
 	static ErrorId EmbSpecChar;
 	static ErrorId PosWild;
+
+	static ErrorId ImportGraphBadRef;
+	static ErrorId ImportPlusGraph;
 
 	static ErrorId ResourceAlreadyLocked;
 	static ErrorId NoSuchResource;
@@ -967,7 +980,15 @@ class MsgDm {
 	static ErrorId LogFormatInvalid;
 	static ErrorId LogNumericInvalid;
 	static ErrorId LogEventsUnmatched;
-	static ErrorId AutoResolve;
+	static ErrorId JournalStateBadFmt;
+	static ErrorId ExtensionsData;
+	static ErrorId ExtensionCfgData;
+	static ErrorId ExtCfgSave;
+	static ErrorId ExtCfgNoChange;
+	static ErrorId ExtensionDepotMissing;
+	static ErrorId VerifyContentFileError;
+	static ErrorId VerifyContentError;
+	static ErrorId CommandNotOnServer;
 
 	// Retired ErrorIds. We need to keep these so that clients 
 	// built with newer apis can commnunicate with older servers 

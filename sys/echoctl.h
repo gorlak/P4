@@ -19,7 +19,10 @@ class NoEcho {
 	NoEcho();
 	~NoEcho();
 
+	void SetCleanup( bool v );
+
     private:
 	EchoContext *context;
+	bool cleanup;
 
 } ;

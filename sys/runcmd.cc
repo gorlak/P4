@@ -14,6 +14,10 @@
 # define NEED_POPEN
 # define NEED_FORK
 # define NEED_SOCKETPAIR
+# define NEED_SLEEP
+
+#include <sys/types.h>
+#include <signal.h>
 
 # include <stdhdrs.h>
 
@@ -601,9 +605,6 @@ RunCommand::WaitChild()
  * Also returns false if there's an error and we can't tell whether or not
  * the child is still alive.
  * Does *NOT* reap the child; you still need to call WaitChild() for that.
- *
- * Currently implemented *only* on Windows (it's not needed anywhere else).
- * Added to support p4sandbox.
  */
 bool
 RunCommand::PollChild(unsigned long millisecs) const
@@ -632,15 +633,46 @@ RunCommand::PollChild(unsigned long millisecs) const
 	return status != STILL_ACTIVE;
 }
 
+void
+RunCommand::StopChild()
+{
+	if( !pid )
+	    return;
+
+	TerminateProcess( pid, 1 );
+}
+
 # else
 
-/*
- * dummy no-op implementation for non-Windows platforms
- */
 bool
 RunCommand::PollChild(unsigned long millisecs) const
 {
-    return false;
+	// If pid is NULL, there was no subprocess.
+	if( !pid )
+	    return true;
+
+	int r = waitpid( pid, NULL, WNOHANG );
+
+	if( r > 0 )
+	    return true;
+
+	msleep( millisecs );
+
+	r = waitpid( pid, NULL, WNOHANG );
+
+	if( r == -1 || r == 0 )
+	    return false;
+
+	return true;
+}
+
+void
+RunCommand::StopChild()
+{
+	if( !pid )
+	    return;
+
+	kill( pid, SIGTERM );
 }
 
 # endif

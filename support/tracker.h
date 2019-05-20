@@ -70,9 +70,11 @@ enum TrackerType {
 	PX_FAULTS_OTH,			// proxy faults adopted from others
 	PX_FLUSHES,			// proxy flush1 messages processed
 	PX_DELIVERIES,			// proxy cache deliveries
-	PX_DELIVERIES_MB,		// proxy cache deliveries megabytes
+	PX_DELIVERIES_BYTES,		// proxy cache deliveries bytes
 	PX_TOT_FAULTS,			// proxy cache total faults
-	PX_TOT_FAULTS_MB,		// proxy fault total megabytes
+	PX_TOT_FAULTS_BYTES,		// proxy fault total bytes
+	PX_DIRECT_COUNT,		// proxy direct from server count
+	PX_DIRECT_BYTES,		// proxy direct from server bytes
 
 	TT_LAST
 }  ;

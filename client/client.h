@@ -234,6 +234,7 @@ class Client : public Rpc {
 	const StrPtr	&GetPassword( const StrPtr *user, int forceTFile = 0 );
 	const StrPtr	&GetPassword2();
 	const StrPtr	&GetPort();
+	const StrPtr	&GetProg();
 	const StrPtr	&GetUser();
 	const StrPtr	&GetTempPath();
 	const StrPtr	&GetTicketFile();
@@ -244,6 +245,7 @@ class Client : public Rpc {
 	const StrPtr	&GetSyncTrigger();
 	const StrPtr	&GetIgnoreFile();
 	const StrPtr	&GetInitRoot();
+	const StrPtr	&GetVersion();
 	const StrPtr	&GetBuild() { return buildInfo; }
 	const StrPtr	&GetExecutable() { return exeName; }
 
@@ -356,6 +358,7 @@ class Client : public Rpc {
 	StrBuf		host;		// client host name
 	StrBuf		os;		// client's OS
 	StrBuf		programName;	// (optionally) set by SetProg()
+	StrBuf		programVersion;	// (optionally) set by SetVersion()
 	StrBuf		port;		// server address (P4PORT)
 	StrBuf		serverID;	// server address (ID from server)
 	StrBuf		user;		// user's name
@@ -391,4 +394,6 @@ class Client : public Rpc {
 	void		SetupUnicode( Error * );
 	void		LearnUnicode( Error * );
 	void		LateUnicodeSetup( const char *, Error * );
+
+	bool		finalized, initialized;
 } ;

@@ -26,6 +26,9 @@
 
 # include "client.h"
 
+# include <ident.h>
+extern Ident p4api_ident;
+
 const StrPtr &
 Client::GetCharset()
 {
@@ -335,6 +338,17 @@ Client::GetPort()
 }
 
 const StrPtr &
+Client::GetProg()
+{
+	// If program name has not been set yet, use p4 api
+	// ident as program name.
+	if( !programName.Length() )
+	    SetProg( p4api_ident.GetIdent() );
+
+	return programName;
+}
+
+const StrPtr &
 Client::GetUser()
 {
 	char *c;
@@ -490,7 +504,6 @@ Client::GetConfigs()
 	return enviro->GetConfigs();
 }
 
-
 const StrPtr &
 Client::GetInitRoot()
 {
@@ -500,6 +513,12 @@ Client::GetInitRoot()
 	    initRoot.Set( c );
 	
 	return initRoot;
+}
+
+const StrPtr &
+Client::GetVersion()
+{
+	return programVersion;
 }
 
 /*

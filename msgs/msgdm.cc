@@ -22,7 +22,7 @@
  * When adding a new error make sure its greater than the current high
  * value and update the following number:
  *
- * Current high value for a MsgDm error code is: 963
+ * Current high value for a MsgDm error code is: 984
  */
 
 # include <error.h>
@@ -256,6 +256,7 @@ ErrorId MsgDm::RmtAddDomainFailed      = { ErrorOf( ES_DM, 757, E_FAILED, EV_FAU
 ErrorId MsgDm::RmtDeleteDomainFailed   = { ErrorOf( ES_DM, 754, E_FAILED, EV_FAULT, 1 ), "Commit server access failed while trying to delete a domain named %domainName%." } ;
 ErrorId MsgDm::RmtExclusiveLockFailed  = { ErrorOf( ES_DM, 758, E_FAILED, EV_FAULT, 0 ), "Commit server access failed while trying to get/release exclusive (+l) filetype." } ;
 ErrorId MsgDm::RmtGlobalLockFailed  = { ErrorOf( ES_DM, 876, E_FAILED, EV_FAULT, 0 ), "Commit server access failed while trying to get/release global lock on file." } ;
+ErrorId MsgDm::RmtUpdFoverSeenFailed  = { ErrorOf( ES_DM, 982, E_FAILED, EV_FAULT, 0 ), "Remote server access failed while trying to update failoverSeen in server table." } ;
 ErrorId MsgDm::RemoteDomainExists      = { ErrorOf( ES_DM, 755, E_FAILED, EV_FAULT, 1 ), "A domain named %domainName% already exists in this installation." } ;
 ErrorId MsgDm::RemoteDomainMissing     = { ErrorOf( ES_DM, 756, E_FAILED, EV_FAULT, 1 ), "There is no domain named %domainName% in this installation." } ;
 ErrorId MsgDm::ServiceUserLogin        = { ErrorOf( ES_DM, 720, E_FAILED, EV_FAULT, 0 ), "Remote server refused request. Please verify that service user is correctly logged in to remote server, then retry." } ;
@@ -322,6 +323,7 @@ ErrorId MsgDm::ChangesData             = { ErrorOf( ES_DM, 206, E_INFO, EV_NONE,
 ErrorId MsgDm::ChangesDataPending      = { ErrorOf( ES_DM, 207, E_INFO, EV_NONE, 5 ), "%change% on %date% by %user%@%client% *pending*%description%" } ;
 
 ErrorId MsgDm::ConfigData              = { ErrorOf( ES_DM, 545, E_INFO, EV_NONE, 3 ), "%serverName%: %variableName% = %variableValue%" } ;
+ErrorId MsgDm::ConfigDataS             = { ErrorOf( ES_DM, 967, E_INFO, EV_NONE, 2 ), "%variableName% = %variableValue%" } ;
 ErrorId MsgDm::NoSuchConfig            = { ErrorOf( ES_DM, 546, E_FAILED, EV_UNKNOWN, 1 ), "No such configuration variable '%config%'." } ;
 ErrorId MsgDm::ConfigWasNotSet         = { ErrorOf( ES_DM, 547, E_FAILED, EV_UNKNOWN, 1 ), "Configuration variable '%config%' did not have a value." } ;
 ErrorId MsgDm::UseConfigure            = { ErrorOf( ES_DM, 548, E_FAILED, EV_UNKNOWN, 0 ), "Usage: { %'set [name#]var=value | unset [name#]var'% }" } ;
@@ -344,6 +346,7 @@ ErrorId MsgDm::DepotNoChange           = { ErrorOf( ES_DM, 211, E_INFO, EV_NONE,
 ErrorId MsgDm::DepotDelete             = { ErrorOf( ES_DM, 212, E_INFO, EV_NONE, 1 ), "Depot %depotName% deleted." } ;
 ErrorId MsgDm::DepotTypeDup            = { ErrorOf( ES_DM, 885, E_FAILED, EV_CONTEXT, 2 ), "There is already a %depotType% depot called '%depot%'." };
 ErrorId MsgDm::DepotUnloadDup          = { ErrorOf( ES_DM, 701, E_FAILED, EV_CONTEXT, 1 ), "There is already an %'unload'% depot called '%depot%'." };	//CONTENTIOUS
+ErrorId MsgDm::DepotExtensionDup          = { ErrorOf( ES_DM, 970, E_FAILED, EV_CONTEXT, 1 ), "There is already an %'extension'% depot called '%depot%'." };
 ErrorId MsgDm::NoDepotTypeChange       = { ErrorOf( ES_DM, 618, E_FAILED, EV_ILLEGAL, 0 ), "Depot %'type'% cannot be changed." } ;	//CONTENTIOUS
 ErrorId MsgDm::DepotMapInvalid         = { ErrorOf( ES_DM, 442, E_FAILED, EV_USAGE, 1 ), "%'Map'% entry '%map%' must have only 1 wildcard which must be a trailing '/...' or '\\...'." }; //CONTENTIOUS
 ErrorId MsgDm::DepotNotStream          = { ErrorOf( ES_DM, 507, E_FAILED, EV_NONE, 1 ), "Depot %'type'% for '%depot%' must be '%'stream'%'." };	//CONTENTIOUS
@@ -388,10 +391,14 @@ ErrorId MsgDm::ServerDelete            = { ErrorOf( ES_DM, 663, E_INFO, EV_NONE,
 ErrorId MsgDm::NoSuchServer            = { ErrorOf( ES_DM, 664, E_FAILED, EV_UNKNOWN, 1 ), "Server '%server%' doesn't exist." } ;
 ErrorId MsgDm::ServersData             = { ErrorOf( ES_DM, 665, E_INFO, EV_NONE, 6 ), "%serverID% %type% %name% %address% %services% '%description%'" } ;
 ErrorId MsgDm::ServerTypeMismatch      = { ErrorOf( ES_DM, 719, E_FAILED, EV_CONTEXT, 0 ), "Server type is not appropriate for specified server services." } ;
+ErrorId MsgDm::ServerRplFromMandatory  = { ErrorOf( ES_DM, 964, E_FAILED, EV_CONTEXT, 0 ), "'ReplicatingFrom' field required for a 'standby' or 'forwarding-standby' server." } ;	//NOTRANS
+ErrorId MsgDm::ServerRplFromRplOnly    = { ErrorOf( ES_DM, 965, E_FAILED, EV_CONTEXT, 0 ), "'ReplicatingFrom' field can't be specified for this type of server." } ;	//NOTRANS
+ErrorId MsgDm::ServerRplFromSame       = { ErrorOf( ES_DM, 966, E_FAILED, EV_CONTEXT, 0 ), "'ReplicatingFrom' field can't be the same as the 'ServerID' field." } ;	//NOTRANS
 ErrorId MsgDm::ServerViewMap           = { ErrorOf( ES_DM, 745, E_FAILED, EV_CONTEXT, 0 ), "This type of view mapping may not be provided for this server." } ;
 ErrorId MsgDm::FiltersReplicaOnly      = { ErrorOf( ES_DM, 746, E_FAILED, EV_CONTEXT, 0 ), "Data Filters should be specified only for replica servers." } ;
 ErrorId MsgDm::ServerConfigUsage      = { ErrorOf( ES_DM, 931, E_FAILED, EV_CONTEXT, 0 ), "Invalid DistributedConfig syntax: must use 'var=value'" } ;
 ErrorId MsgDm::ServerConfigInvalidVar      = { ErrorOf( ES_DM, 932, E_FAILED, EV_CONTEXT, 1 ), "Configuration variable '%name%' cannot be set from here." } ;
+ErrorId MsgDm::ServerConfigMustBeSet      = { ErrorOf( ES_DM, 971, E_FAILED, EV_CONTEXT, 1 ), "Configuration variable '%name%' must have a value." } ;
 ErrorId MsgDm::ServerConfigRO      = { ErrorOf( ES_DM, 933, E_FAILED, EV_CONTEXT, 2 ), "Configuration variable '%name%' must be set to '%value%'." } ;
 ErrorId MsgDm::ServerCantConfig      = { ErrorOf( ES_DM, 934, E_FAILED, EV_CONTEXT, 0 ), "%'DistributedConfig'% can only be set with %'-c'% option." } ;
 ErrorId MsgDm::ServerSvcInvalid      = { ErrorOf( ES_DM, 935, E_FAILED, EV_CONTEXT, 2 ), "Configuration for '%services%' cannot be set on server that uses '%existingSvc%' Services." } ;
@@ -467,6 +474,7 @@ ErrorId MsgDm::IntegIntoReadOnly       = { ErrorOf( ES_DM, 251, E_INFO, EV_NONE,
 ErrorId MsgDm::IntegIntoReadOnlyAndMap = { ErrorOf( ES_DM, 926, E_INFO, EV_NONE, 2 ), "%clientFile% - can't %action% into file that is additionally mapped in client's View" } ;
 ErrorId MsgDm::IntegIntoReadOnlyCMap   = { ErrorOf( ES_DM, 927, E_INFO, EV_NONE, 2 ), "%clientFile% - can't %action% into file that is restricted by client's ChangeView mapping" } ;
 ErrorId MsgDm::IntegXOpened            = { ErrorOf( ES_DM, 252, E_INFO, EV_NONE, 2 ), "%depotFile% - can't %action% exclusive file already opened" } ;
+ErrorId MsgDm::IntegXOpenedWarn        = { ErrorOf( ES_DM, 981, E_WARN, EV_NONE, 2 ), "%depotFile% - can't %action% exclusive file already opened" } ;
 ErrorId MsgDm::IntegBadAncestor        = { ErrorOf( ES_DM, 253, E_INFO, EV_NONE, 5 ), "%depotFile% - can't %action% from %fromFile%%fromRev% without %'-d'% or %flag% flag" } ;
 
 // WENDY add delimiters below this line
@@ -554,11 +562,12 @@ ErrorId MsgDm::MoveNeedForce           = { ErrorOf( ES_DM, 530, E_INFO, EV_NONE,
 ErrorId MsgDm::MoveCantForce           = { ErrorOf( ES_DM, 953, E_INFO, EV_NONE, 1 ), "%clientFile% - is synced; can't use -r with existing target" } ;
                                
 ErrorId MsgDm::OpenAlready             = { ErrorOf( ES_DM, 284, E_INFO, EV_NONE, 2 ), "%depotFile% - can't %action% (already opened on this client)" } ;
-ErrorId MsgDm::OpenReadOnly            = { ErrorOf( ES_DM, 285, E_INFO, EV_NONE, 2 ), "%depotFile% - can only %action% file in a local depot" } ;
+ErrorId MsgDm::OpenReadOnly            = { ErrorOf( ES_DM, 285, E_INFO, EV_NONE, 2 ), "%depotFile% - file is mapped read-only, can only %action% file in a local depot" } ;
 ErrorId MsgDm::OpenReadOnlyAndMap      = { ErrorOf( ES_DM, 930, E_INFO, EV_NONE, 2 ), "%clientFile% - can't %action% file that is additionally mapped in client's View" } ;
 ErrorId MsgDm::OpenReadOnlyCMap        = { ErrorOf( ES_DM, 925, E_INFO, EV_NONE, 2 ), "%clientFile% - can't %action% file that is restricted by client's ChangeView mapping" } ;
 ErrorId MsgDm::OpenXOpened             = { ErrorOf( ES_DM, 286, E_INFO, EV_NONE, 2 ), "%depotFile% - can't %action% exclusive file already opened" } ;
 ErrorId MsgDm::OpenXOpenedFailed       = { ErrorOf( ES_DM, 777, E_FAILED, EV_NONE, 2 ), "%depotFile% - can't %action% exclusive file already opened" } ;
+ErrorId MsgDm::OpenXOpenedWarn         = { ErrorOf( ES_DM, 980, E_WARN, EV_NONE, 2 ), "%depotFile% - can't %action% exclusive file already opened" } ;
 ErrorId MsgDm::OpenBadAction           = { ErrorOf( ES_DM, 287, E_INFO, EV_NONE, 3 ), "%depotFile% - can't %action% (already opened for %badAction%)" } ;
 ErrorId MsgDm::OpenBadClient           = { ErrorOf( ES_DM, 288, E_INFO, EV_NONE, 2 ), "%depotFile% - is already opened by client %client%" } ;
 ErrorId MsgDm::OpenBadUser             = { ErrorOf( ES_DM, 289, E_INFO, EV_NONE, 2 ), "%depotFile% - is already opened by user %user%" } ;
@@ -723,6 +732,8 @@ ErrorId MsgDm::EmbWild                 = { ErrorOf( ES_DM, 543, E_FAILED, EV_USA
 ErrorId MsgDm::EmbEllipse              = { ErrorOf( ES_DM, 924, E_FAILED, EV_USAGE, 1 ), "Embedded wildcards (...) not allowed in '%path%'." } ;
 ErrorId MsgDm::EmbSpecChar             = { ErrorOf( ES_DM, 700, E_FAILED, EV_USAGE, 1 ), "Embedded special characters (*, %%, #, @) not allowed in '%path%'." } ;
 ErrorId MsgDm::PosWild                 = { ErrorOf( ES_DM, 515, E_FAILED, EV_USAGE, 1 ), "Positional wildcards (%%%%x) not allowed in path: '%path%'." } ;
+ErrorId MsgDm::ImportGraphBadRef       = { ErrorOf( ES_DM, 978, E_FAILED, EV_USAGE, 0 ), "Import of graph depot must specify a reference." } ;
+ErrorId MsgDm::ImportPlusGraph         = { ErrorOf( ES_DM, 979, E_FAILED, EV_USAGE, 0 ), "Import+ of graph depots are not allowed." } ;
 
 ErrorId MsgDm::StreamOpened	       = { ErrorOf( ES_DM, 904, E_INFO, EV_NONE, 2 ), "Stream %stream%[@%haveChange%] - opened on this client" } ;
 ErrorId MsgDm::StreamIsOpen            = { ErrorOf( ES_DM, 905, E_WARN, EV_NOTYET, 1 ), "Stream %stream% is already open on this client." } ;
@@ -791,7 +802,7 @@ ErrorId MsgDm::TriggerNoChange         = { ErrorOf( ES_DM, 353, E_INFO, EV_NONE,
 ErrorId MsgDm::TriggerNoDepotFile      = { ErrorOf( ES_DM, 793, E_FAILED, EV_USAGE, 2 ), "Trigger depot file '%file%' not found, purged or wrong type for trigger '%trigger%'." } ;
 ErrorId MsgDm::TriggerNoArchiveType    = { ErrorOf( ES_DM, 794, E_FAILED, EV_USAGE, 0 ), "Archive trigger may not use trigger depot files." } ;
 ErrorId MsgDm::TriggerDuplicateType    = { ErrorOf( ES_DM, 960, E_FAILED, EV_USAGE, 1 ), "Only one trigger of type %type% allowed." } ;
-ErrorId MsgDm::TriggerIncomplete2FA    = { ErrorOf( ES_DM, 961, E_FAILED, EV_USAGE, 0 ), "Incomplete set of second factor authentication triggers defined." } ;
+ErrorId MsgDm::TriggerIncomplete2FA    = { ErrorOf( ES_DM, 961, E_FAILED, EV_USAGE, 0 ), "Incomplete set of multi factor authentication triggers defined." } ;
 
 ErrorId MsgDm::TypeMapSave             = { ErrorOf( ES_DM, 354, E_INFO, EV_NONE, 1 ), "%type% saved." } ;
 ErrorId MsgDm::TypeMapNoChange         = { ErrorOf( ES_DM, 355, E_INFO, EV_NONE, 1 ), "%type% not changed." } ;
@@ -905,7 +916,8 @@ ErrorId MsgDm::AdminSetLdapUserNoSuper = { ErrorOf( ES_DM, 875, E_FAILED, EV_USA
 // XXX These should be ES_DM.
 
 ErrorId MsgDm::NotUnderRoot            = { ErrorOf( ES_DB, 39, E_FAILED, EV_CONTEXT, 2 ), "Path '%path%' is not under client's root '%root%'." } ;
-ErrorId MsgDm::NotUnderClient          = { ErrorOf( ES_DB, 40, E_FAILED, EV_CONTEXT, 2 ), "Path '%path%' is not under client '%client%'." } ;
+ErrorId MsgDm::NotUnderClient          = { ErrorOf( ES_DB, 40, E_FAILED, EV_CONTEXT, 2 ), "Path '%path%' is not under client '%client%'." };
+ErrorId MsgDm::FailedToMap             = { ErrorOf( ES_DM, 983, E_FAILED, EV_USAGE, 1 ), "Failed to map '%path%' to target path!" };
 
 ErrorId MsgDm::CommandCancelled        = { ErrorOf( ES_DB, 62, E_FAILED, EV_COMM, 0 ), "Command terminated because client closed connection." } ;
 ErrorId MsgDm::MaxResults              = { ErrorOf( ES_DB, 32, E_FAILED, EV_ADMIN, 1 ), "Request too large (over %maxResults%); see '%'p4 help maxresults'%'." } ;
@@ -923,8 +935,8 @@ ErrorId MsgDm::DiskSpaceEstimated      = { ErrorOf( ES_DM, 614, E_FAILED, EV_UNK
 
 ErrorId MsgDm::ResourceAlreadyLocked   = { ErrorOf( ES_DM, 628, E_FATAL, EV_FAULT, 2 ), "Resource %objType%#%objName% is already locked!" } ; // NOTRANS
 ErrorId MsgDm::NoSuchResource          = { ErrorOf( ES_DM, 629, E_FATAL, EV_FAULT, 2 ), "Resource %objType%#%objName% was never locked!" } ; // NOTRANS
-ErrorId MsgDm::ServersJnlAckData       = { ErrorOf( ES_DM, 801, E_INFO, EV_NONE, 9 ),
-    "%serverID% '%lastUpdate%' %serverType% %persistedJnl%/%persistedPos% %appliedJnl%/%appliedPos% %jaFlags% %isAlive%" } ; // NOTRANS
+ErrorId MsgDm::ServersJnlAckData       = { ErrorOf( ES_DM, 801, E_INFO, EV_NONE, 10 ),
+    "%serverID% '%lastUpdate%' %serverType% %persistedJnl%/%persistedPos% %appliedJnl%/%appliedPos% %jaFlags% %isAlive% %mandatory%" } ; // NOTRANS
 ErrorId MsgDm::NoSharedRevision        = { ErrorOf( ES_DM, 817, E_FAILED, EV_USAGE, 1 ), "Cannot import %depotFile% because there is no existing revision." } ;
 ErrorId MsgDm::NoSharedHistory         = { ErrorOf( ES_DM, 853, E_FAILED, EV_USAGE, 2 ), "Cannot import %depotFile%%depotRev% because it is not common to both file histories." } ;
 ErrorId MsgDm::ImportNoPermission         = { ErrorOf( ES_DM, 846, E_FAILED, EV_CONTEXT, 1 ), "Cannot import '%depotFile%' - protected namespace - access denied" } ;
@@ -991,6 +1003,16 @@ ErrorId MsgDm::LogFilenameInvalid      = { ErrorOf( ES_DM, 947, E_FAILED, EV_USA
 ErrorId MsgDm::LogFormatInvalid        = { ErrorOf( ES_DM, 948, E_FAILED, EV_USAGE, 0 ), "Log format is invalid." } ;
 ErrorId MsgDm::LogNumericInvalid       = { ErrorOf( ES_DM, 949, E_FAILED, EV_USAGE, 1 ), "Log %property% must be numeric." } ;
 ErrorId MsgDm::LogEventsUnmatched      = { ErrorOf( ES_DM, 950, E_FAILED, EV_USAGE, 0 ), "Log captures no events." } ;
+ErrorId MsgDm::JournalStateBadFmt      = { ErrorOf( ES_DM, 968, E_FAILED, EV_ADMIN, 1 ), "State file %stateFile% has unexpected content." } ;
+ErrorId MsgDm::ExtensionsData          = { ErrorOf( ES_DM, 969, E_INFO, EV_NONE, 7 ), "'%ext%' rev:%rev%, description:'%description%', developer:%developer%, UUID:%uuid%, version:%version%, enabled:%enabled%" } ;
+ErrorId MsgDm::ExtensionCfgData        = { ErrorOf( ES_DM, 973, E_INFO, EV_NONE, 5 ), "'%cfg%' '%ext%' %owner% %type% %arg%" } ;
+ErrorId MsgDm::ExtCfgSave              = { ErrorOf( ES_DM, 974, E_INFO, EV_NONE, 1 ), "Extension config %name% saved." } ;
+ErrorId MsgDm::ExtCfgNoChange          = { ErrorOf( ES_DM, 975, E_INFO, EV_NONE, 0 ), "Extension config not changed." } ;
+ErrorId MsgDm::ExtensionDepotMissing   = { ErrorOf( ES_DM, 972, E_FAILED, EV_USAGE, 0 ), "No extensions depot has been defined for this server." } ;
+ErrorId MsgDm::VerifyContentFileError  = { ErrorOf( ES_DM, 976, E_FATAL, EV_FAULT, 4 ), "Verify content error: file %file%%rev% %digest% %status%." } ;
+ErrorId MsgDm::VerifyContentError      = { ErrorOf( ES_DM, 977, E_FATAL, EV_FAULT, 0 ), "Verify content detected one or more errors." } ;
+ErrorId MsgDm::CommandNotOnServer      = { ErrorOf( ES_DM, 984, E_FAILED, EV_NONE, 0 ), "The upstream server does not support this function." } ;
+
 
 // ErrorId graveyard: retired/deprecated ErrorIds. 
 

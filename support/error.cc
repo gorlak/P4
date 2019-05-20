@@ -124,6 +124,45 @@ Error::Set( const ErrorId &id )
 	return *this;
 }
 
+
+/*
+ * Error::Set() - add an error message into an Error struct with dict
+ * Warning: advanced usage only!
+ */
+
+Error &
+Error::Set( const ErrorId &id, StrDict *errorDict )
+{
+	/* First access?  Set private. */
+
+	if (!ep)
+	    ep = new ErrorPrivate;
+
+	/* First error?  Clear things out */
+
+	if (severity == E_EMPTY)
+	    ep->Clear();
+
+	/* If error more severe that previous, save severity & generic */
+
+	ErrorSeverity s = (ErrorSeverity)id.Severity();
+
+	if (s >= severity)
+	{
+	    severity = s;
+	    genericCode = id.Generic();
+	}
+
+	/* Now prepare the error message for formatting. */
+
+	ep->Set(id);
+
+	if( errorDict )
+	    ep->errorDict.CopyVars( *errorDict );
+
+	return *this;
+}
+
 Error &
 Error::operator <<( const StrPtr &arg )
 {

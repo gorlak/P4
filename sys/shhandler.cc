@@ -636,7 +636,7 @@ SHHandler::ListEntry (
 	    //
 	    if( info.callStack[0] != 0 )
 	    {
-		register int i;
+		int i;
 
 		sprintf (msg, "frames: ");
 

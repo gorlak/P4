@@ -18,6 +18,7 @@
 # include <charcvt.h>
 # include <debug.h>
 # include <tunable.h>
+# include <msgserver.h>
 
 # include "filesys.h"
 # include "fileio.h"
@@ -29,8 +30,10 @@ FileIOUnicode::FillBuffer( Error *e )
 
 	if (trans)
 	{
+	    int readlen;
 	    int cnt;
-	    cnt = FileIOCompress::Read( tbuf.Text()+tsz, tbuf.Length()-tsz, e );
+	    readlen = tbuf.Length() - tsz;
+	    cnt = FileIOCompress::Read( tbuf.Text()+tsz, readlen, e );
 	    if ( e->Test() )
 		return;
 
@@ -48,6 +51,26 @@ FileIOUnicode::FillBuffer( Error *e )
 		    // set an error
 		    e->Set( MsgSupp::NoTrans ) << trans->LineCnt() << Name();
 		    return;
+		}
+		else if (trans->LastErr() == CharSetCvt::PARTIALCHAR)
+		{
+		    if( cnt < readlen )
+		    {
+		        /*
+		         * End of file and buffer still had room:
+		         * Read() has read a smaller number of bytes than
+		         * the size of the buffer that was supplied meaning
+		         * it reached the end of file. But cvt() reports
+		         * that the last character is partial. Since we
+		         * have reached the end of file, there are no further
+		         * reading to do to complete this partial character
+		         * therefore report an error equivalent to the NOMapping
+		         * case.
+		         */
+		        e->Set( MsgSupp::NoTrans ) 
+		                << trans->LineCnt() << Name();
+		        return;
+		    }
 		}
 		else if (ts == iobuf.Text())
 		{

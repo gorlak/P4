@@ -31,6 +31,7 @@ class MsgGraph {
 	static ErrorId UseShowRef;
 	static ErrorId UseMerge;
 	static ErrorId UseMerge2;
+	static ErrorId UseUndo;
 	static ErrorId UseRebase;
 	static ErrorId UseCherryPick;
 	static ErrorId UseOpen;
@@ -79,6 +80,8 @@ class MsgGraph {
 	static ErrorId RepoDefaultBranch;
 	static ErrorId FileLogData;
 	static ErrorId SubmoduleData;
+	static ErrorId SubmoduleDeleted;
+	static ErrorId SubmoduleUpdated;
 	static ErrorId RepositoryData;
 	static ErrorId WrongClientType;
 	static ErrorId NotSupported;
@@ -254,6 +257,7 @@ class MsgGraph {
 	static ErrorId BranchNotFound;
 	static ErrorId ManyReposUseAll;
 	static ErrorId MergeComplete;
+	static ErrorId UndoComplete;
 	static ErrorId CherryPickComplete;
 	static ErrorId NoChangeFixes;
 	static ErrorId UnsupportedFileType;
@@ -325,6 +329,7 @@ class MsgGraph {
 	static ErrorId NoSuchUserGrantPerm ;
 	static ErrorId NoSuchGroupGrantPerm ;
 	static ErrorId IdWildPerm;
+	static ErrorId ReferenceHaveComb;
 
 	static ErrorId DescribeHeader;
 	static ErrorId CommitFileShort;
@@ -334,12 +339,16 @@ class MsgGraph {
 	static ErrorId BranchNotMerged;
 	static ErrorId DefBranchForceDel;
 	static ErrorId Resolve3WayText;
+	static ErrorId Resolve2WayRaw;
 	static ErrorId SubmitBadState;
 	static ErrorId SubmitBadStateFiles;
 	static ErrorId MergeOutOfView;
 	static ErrorId HaveSpecificNoRev;
 	static ErrorId NotOnReplica;
-
+	static ErrorId CommitFileLogOneline;
+	static ErrorId WarnNoWriteAccess;
+	static ErrorId BadParentNumber;
+	static ErrorId RefTagUpdateNoForce;
 	// Retired ErrorIds. We need to keep these so that clients
 	// built with newer apis can commnunicate with older servers
 	// still sending these.

@@ -20,7 +20,7 @@
  *	(eventually) another server request.  In the end, the final
  *	message sent to the client should be "release".
  */
-
+# include <memory>
 # include <stdhdrs.h>
 
 # include <signaler.h>
@@ -894,8 +894,15 @@ Rpc::Dispatch( DispatchFlag flag, RpcDispatcher *dispatcher )
 
 	// Push the recvBuffer, in case we are nesting Dispatch().
 
+# ifdef HAS_CPP11
+	// Make sure this gets cleaned up during an exception.
+	std::unique_ptr< RpcRecvBuffer > savRecvBuffer =
+	    std::unique_ptr< RpcRecvBuffer >( recvBuffer );
+	recvBuffer = 0;
+# else
 	RpcRecvBuffer *savRecvBuffer = recvBuffer;
 	recvBuffer = 0;
+# endif
 
 	// Receive (dispatching) until told to stop.
 
@@ -960,7 +967,12 @@ Rpc::Dispatch( DispatchFlag flag, RpcDispatcher *dispatcher )
 	// Pop recvBuffer.
 
 	delete recvBuffer;
+
+# ifdef HAS_CPP11
+	recvBuffer = savRecvBuffer.release();
+# else
 	recvBuffer = savRecvBuffer;
+# endif
 
 	RPC_DBG_PRINTF( DEBUG_FLOW,
 	        "<<< Dispatch(%d%s) %d/%d %d/%d %d",

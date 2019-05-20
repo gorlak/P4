@@ -73,6 +73,12 @@ Threader::Restart()
 }
 
 void
+Threader::NoDowngrade()
+{
+	canDowngrade = 0;
+}
+
+void
 Threader::Quiesce()
 {
 	// no special work for single threading
@@ -217,7 +223,7 @@ class MultiThreader : public Threader {
 	    if( NT_ThreadList->Empty() )
 		return;
 
-	    if( restarted )
+	    if( restarted && canDowngrade )
 	    {
 		Error e;
 		DateTime date;

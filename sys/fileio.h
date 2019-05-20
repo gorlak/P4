@@ -11,6 +11,7 @@
  *
  *	FileIO - hulk that acts on files, but not content
  *	FileIOBinary - raw binary files (unbuffered)
+ *	FileIODir - not a file, but a dir - useful for auto-cleaned temp dirs
  *	FileIOBuffer - buffered files: raw/cr/crlf
  *	FileIOUnicode - buffered files: raw/cr/crlf w/UTF8 translation
  *	FileIOUTF16 - buffered files: raw/cr/crlf w/UTF8vs16 translation
@@ -82,6 +83,26 @@ class FileIOBinary : public FileIO {
 		int standard;
 	} openModes[4];
 
+} ;
+
+class FileIODir : public FileIOBinary {
+    public:
+
+	 FileIODir();
+	~FileIODir();
+
+	void	Open( FileOpenMode mode, Error *e );
+	void	Write( const char *buf, int len, Error *e );
+	int	Read( char *buf, int len, Error *e );
+	void	Close( Error *e );
+
+	int	GetFd();
+	offL_t	GetSize();
+	void	Seek( offL_t offset, Error *e );
+	offL_t	Tell();
+	void	Fsync( Error *e );
+
+	void	Cleanup();
 } ;
 
 class FileIOCompress : public FileIOBinary {
@@ -259,7 +280,7 @@ class AppleForkSplit;
 class AppleForkCombine;
 class DataFork;
 
-# if !defined ( OS_MACOSX )
+# if !(defined ( OS_MACOSX ) && OS_VER < 1010)
 
 class FileIOResource : public FileIOBinary { } ;
 

@@ -25,6 +25,7 @@
 #include <time.h>
 #include <error.h>
 #include <pid.h>
+#include <utils.h>
 
 #include "datetime.h"
 #include "uuid.h"
@@ -138,3 +139,46 @@ BaseUUID::ToStrBuf(StrBuf	&buf) const
 
 	return buf;
 } // ToStrBuf
+
+
+/**
+ * Parse
+ * - return true if key contains a valid uuid string in 8-4-4-4-12 format,
+ * - otherwise return false.
+ */
+
+bool
+BaseUUID::Parse( const StrBuf& key )
+{
+	bool valid_uuid = true;
+	const unsigned short uuid_len = 36;
+	const unsigned short dash1_offset = 8;
+	const unsigned short dash2_offset = dash1_offset + 1 + 4;
+	const unsigned short dash3_offset = dash2_offset + 1 + 4;
+	const unsigned short dash4_offset = dash3_offset + 1 + 4;
+
+	if( key.Length() != uuid_len )
+	    valid_uuid = false; 
+	else
+	for( int i = 0; i < uuid_len; ++i )
+	{
+	    if( i == dash1_offset || i == dash2_offset || i == dash3_offset ||
+	        i == dash4_offset )
+	    {
+	        if( key[i] != '-' )
+	        {	
+	            valid_uuid = false;
+	            break;
+	        }
+	    }
+	    else {
+	        if( !IsHex( key[i] ) )
+	        {	
+	            valid_uuid = false;
+	            break;
+	        }
+	    }
+	}
+	return valid_uuid;
+}
+

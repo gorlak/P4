@@ -99,6 +99,9 @@ Client::Client( Enviro *e ) : Rpc( &service )
 	service.SetProtocol( P4Tag::v_client, P4Tag::l_client );
 
 	buildInfo = p4api_ident.GetIdent();
+
+	finalized = false;
+	initialized = false;
 }
 
 Client::~Client()
@@ -114,6 +117,8 @@ Client::~Client()
 void
 Client::Init( Error *e )
 {
+	finalized = false;
+
 	// Set up address and connect.
 	errors = 0;
 
@@ -135,6 +140,8 @@ Client::Init( Error *e )
 
 	if( !e->Test() )
 	{
+	    initialized = true;
+
 	    DoHandshake( e );	// no-op if not ssl
 
 	    if( !e->Test() && unknownUnicode )
@@ -143,10 +150,7 @@ Client::Init( Error *e )
 		
 		// discover unicode server status
 
-		// if program name has not been set yet, use p4 api
-		// ident as program name
-		if( !programName.Length() )
-		    SetVar( P4Tag::v_prog, p4api_ident.GetIdent() );
+		SetVar( P4Tag::v_prog, GetProg() );
 
 		Run( "discover", &cnull );
 
@@ -186,6 +190,15 @@ Client::Init( Error *e )
 void
 Client::Run( const char *func, ClientUser *u )
 {
+	if( finalized )
+	{
+	    Error e;
+	    e.Set( MsgClient::DevErr ) << "Run() after Final()";
+	    u->HandleError( &e );
+	    SetError();
+	    return;
+	}
+
 	// Run the command async, and then wait.
 
 	RunTag( func, u );
@@ -196,6 +209,17 @@ Client::Run( const char *func, ClientUser *u )
 void
 Client::RunTag( const char *func, ClientUser *u )
 {
+	if( finalized || !initialized )
+	{
+	    static const char* ef = "RunTag() after Final()";
+	    static const char* ei = "RunTag() before Init()";
+	    Error e;
+	    e.Set( MsgClient::DevErr ) << ( finalized ? ef : ei );
+	    u->HandleError( &e );
+	    SetError();
+	    return;
+	}
+
 	Error e;
 
 	// for assembla... job067346 - late protocol set
@@ -256,8 +280,7 @@ Client::RunTag( const char *func, ClientUser *u )
 	    pubKeyChecked = 1;
 	}
 
-	if( programName.Length() )
-	    SetVar( P4Tag::v_prog, programName );
+	SetVar( P4Tag::v_prog, GetProg() );
 
 	// Formulate up function name.
 	// Set user/client/os/cwd
@@ -288,6 +311,15 @@ Client::RunTag( const char *func, ClientUser *u )
 void
 Client::WaitTag( ClientUser *u )
 {
+	if( finalized )
+	{
+	    Error e;
+	    e.Set( MsgClient::DevErr ) << "WaitTag() after Final()";
+	    u->HandleError( &e );
+	    SetError();
+	    return;
+	}
+
 	// While any RunTag() requests are outstanding, Dispatch().
 	// Dispatch() returns exactly once for each Invoke().
 
@@ -318,6 +350,9 @@ Client::WaitTag( ClientUser *u )
 int
 Client::Final( Error *e )
 {
+	finalized = true;
+	initialized = false;
+
 	// Dispatch returns when the other end is waiting for another
 	// request.  We tell it to go away with ReleaseFinal.
 	// Then we disconnect.
@@ -453,12 +488,14 @@ Client::SetProg( const StrPtr *prog )
 void
 Client::SetVersion( const char *version )
 {
+	programVersion.Set( version );
 	SetVar( P4Tag::v_version, version );
 }
 
 void
 Client::SetVersion( const StrPtr *version )
 {
+	programVersion.Set( version );
 	SetVar( P4Tag::v_version, version );
 }
 

@@ -166,6 +166,7 @@ struct P4Tag {
 	static const char v_externalAuth[];
 	static const char v_extraTag[];
 	static const char v_extraTagType[];
+	static const char v_failoverSeen[];
 	static const char v_fatal[];
 	static const char v_fileCount[];
 	static const char v_fileNum[];
@@ -321,6 +322,7 @@ struct P4Tag {
 	static const char v_serverEncryption[];
 	static const char v_serverCertExpires[];
 	static const char v_serverName[];
+	static const char v_serverOpts[];
 	static const char v_serverRoot[];
 	static const char v_serverType[];
 	static const char v_serverUptime[];
@@ -335,6 +337,7 @@ struct P4Tag {
 	static const char v_specFormatted[];
 	static const char v_srev[];
 	static const char v_sso[];
+	static const char v_ssoAuth[];
 	static const char v_startFromRev[];
 	static const char v_startToRev[];
 	static const char v_stat[];
@@ -385,6 +388,8 @@ struct P4Tag {
 	static const char v_altArg[];		// p4 jobspec
 	static const char v_altArg2[];		// p4 change
 	static const char v_altArg3[];		// p4 stream
+	static const char v_altArg4[];		// p4 extension
+	static const char v_altArg5[];		// p4 extension
 	static const char v_arg[];
 	static const char v_asBinary[];		// p4 resolve
 	static const char v_attrib[];		// p4 index
@@ -472,6 +477,7 @@ struct P4Tag {
 	static const char u_diff2[];
 	static const char u_dirs[];
 	static const char u_edit[];
+	static const char u_failover[];
 	static const char u_fetch[];
 	static const char u_filelog[];
 	static const char u_files[];

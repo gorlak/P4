@@ -105,8 +105,8 @@ bool		StrPtr::foldingSet = 0;
 int 
 StrPtr::CCompare( const char *sa, const char *sb )
 {
-	register const unsigned char *a = (const unsigned char *)sa;
-	register const unsigned char *b = (const unsigned char *)sb;
+	const unsigned char *a = (const unsigned char *)sa;
+	const unsigned char *b = (const unsigned char *)sb;
 
 	// Case significant part (fast)
 
@@ -124,8 +124,8 @@ StrPtr::CCompare( const char *sa, const char *sb )
 int 
 StrPtr::SCompare( const char *sa, const char *sb )
 {
-	register const unsigned char *a = (const unsigned char *)sa;
-	register const unsigned char *b = (const unsigned char *)sb;
+	const unsigned char *a = (const unsigned char *)sa;
+	const unsigned char *b = (const unsigned char *)sb;
 
 	// Case significant compare for UNIX
 
@@ -246,9 +246,9 @@ StrPtr::NCompareRight( const unsigned char *a, const unsigned char *b )
 int     
 StrPtr::SCompareN( const StrPtr &s ) const
 {
-	register const unsigned char *a = (const unsigned char *)buffer;
-	register const unsigned char *b = (const unsigned char *)s.buffer;
-	register int n = length;
+	const unsigned char *a = (const unsigned char *)buffer;
+	const unsigned char *b = (const unsigned char *)s.buffer;
+	int n = length;
 
 	// Case significant compare for UNIX
 
@@ -390,6 +390,21 @@ StrPtr::IsNumeric() const
 	while( isAdigit( p ) ) ++p;
 
 	return *p == '\0' && ( p - q ) > 0;
+}
+
+int
+StrPtr::StartsWith( const char *s, int l ) const
+{
+	if( Length() < l )
+	    return 0;
+
+	const char *p = Text();
+
+	while( l-- > 0 )
+	    if( *p++ != *s++ )
+	        return 0;
+
+	return 1;
 }
 
 int
@@ -697,13 +712,13 @@ StrBuf::EncodeTail( StrPtr &s, const char *replaceBytes )
 
 	// job075871: advance past the client name so that substring
 	// is not considered in the match process.
-	register int i = 2;
+	int i = 2;
 	while( i < s.Length() && s.buffer[i] != '/' )
 	    i++;
 	if( s.buffer[i] != '/' )
 	    return 0;
 
-	register int shortest = length < (s.Length() - i)? length : (s.Length() - i);
+	int shortest = length < (s.Length() - i)? length : (s.Length() - i);
 	// bail early if one string is empty
 	if( shortest == 0 )
 	    return 0;
@@ -711,8 +726,8 @@ StrBuf::EncodeTail( StrPtr &s, const char *replaceBytes )
 	// reset counter
 	i = 0;
 
-	register const unsigned char *a = (const unsigned char *)(s.buffer + s.Length() - 1);
-	register const unsigned char *b = (const unsigned char *)(buffer + length - 1);
+	const unsigned char *a = (const unsigned char *)(s.buffer + s.Length() - 1);
+	const unsigned char *b = (const unsigned char *)(buffer + length - 1);
 
 	if( replaceBytes && strncmp(buffer, replaceBytes, 2) != 0)
 		return 0;
@@ -739,7 +754,7 @@ StrBuf::EncodeTail( StrPtr &s, const char *replaceBytes )
 	 * get the offset value into the passed StrPtr where the
 	 * common substring starts.
 	 */
-	register int v = s.Length() - i;
+	int v = s.Length() - i;
 
 	if ((i == 0) || (v > 255) )
 	{
@@ -813,10 +828,10 @@ StrBuf::Compress( StrPtr *s )
 	// convert to 2-byte hex value and append the trailing 
 	// non-matching piece.  (max 255 for FF)
 
-	register const unsigned char *a = (const unsigned char *)buffer;
-	register const unsigned char *b = (const unsigned char *)s->buffer;
-	register int n = length;
-	register int i = 0;
+	const unsigned char *a = (const unsigned char *)buffer;
+	const unsigned char *b = (const unsigned char *)s->buffer;
+	int n = length;
+	int i = 0;
 
 	while( n && *a && *a == *b && ++i < 256 )
 	    ++a, ++b, --n;
@@ -848,7 +863,7 @@ StrBuf::UnCompress( StrPtr *s )
 	// typically this strbuf will be copied into another
 	// record format where it will be correctly sized.
 
-	register int n = length;
+	int n = length;
 
 	int v = ( StrOps::XtoO( buffer[0] ) << 4 )
 	      | ( StrOps::XtoO( buffer[1] ) << 0 );

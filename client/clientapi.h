@@ -166,7 +166,7 @@ class ClientApi : public StrDict {
 	// caller's main interface
 	
 			ClientApi();
-			~ClientApi();
+	virtual		~ClientApi();
 
 	void		SetTrans( int output, int content = -2,
 				int fnames = -2, int dialog = -2 );
@@ -242,10 +242,12 @@ class ClientApi : public StrDict {
 	const StrPtr	&GetPassword();
 	const StrPtr	&GetPassword( const StrPtr *user );
 	const StrPtr	&GetPort();
+	const StrPtr	&GetProg();
 	const StrPtr	&GetUser();
 	const StrPtr	&GetConfig();
 	const StrArray	*GetConfigs();
 	const StrPtr	&GetBuild();
+	const StrPtr	&GetVersion();
 
 	Ignore *	GetIgnore();
 

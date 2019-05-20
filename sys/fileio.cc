@@ -208,7 +208,7 @@ FileIO::Truncate( Error *e )
 
 	int fd;
 
-# if !defined ( OS_MACOSX )
+# if !defined ( OS_MACOSX ) || OS_VER >= 1010
 	if( ( fd = checkFd( openL( Name(), O_WRONLY|O_TRUNC, PERM_0666 ) ) ) >= 0 )
 # else
 	if( ( fd = checkFd( openL( Name(), O_WRONLY|O_TRUNC ) ) ) >= 0 )
@@ -380,6 +380,7 @@ FileIO::StatModTimeHP(DateTimeHighPrecision *modTime)
 
 // nanosecond support for stat is a bit of a portability mess
 #if defined(OS_LINUX)
+  #if defined(__GLIBC__) && defined(__GLIBC_PREREQ)
     #if defined(_BSD_SOURCE) || defined(_SVID_SOURCE) \
 	|| (__GLIBC_PREREQ(2, 12) \
 	    && ((_POSIX_C_SOURCE >= 200809L) || (_XOPEN_SOURCE >= 700)))
@@ -387,7 +388,10 @@ FileIO::StatModTimeHP(DateTimeHighPrecision *modTime)
     #else
 	nanosecs = sb.st_mtimensec;
     #endif
-#elif defined(OS_MACOSX)
+  #else   
+	nanosecs = sb.st_mtim.tv_nsec;
+  #endif
+#elif defined(OS_MACOSX) && OS_VER < 1010
 	/*
 	 * HFS+ stores timestamps in 1-second resolution
 	 * so nanosecs will always be zero, but maybe
@@ -645,6 +649,73 @@ offL_t
 FileIOBinary::Tell()
 {
 	return tellpos;
+}
+
+FileIODir::FileIODir()
+{
+}
+
+FileIODir::~FileIODir()
+{
+	Cleanup();
+}
+
+void
+FileIODir::Open( FileOpenMode mode, Error *e )
+{
+}
+
+void
+FileIODir::Write( const char *buf, int len, Error *e )
+{
+}
+
+int
+FileIODir::Read( char *buf, int len, Error *e )
+{
+	return 0;
+}
+
+void
+FileIODir::Close( Error *e )
+{
+}
+
+int
+FileIODir::GetFd()
+{
+	return 0;
+}
+
+offL_t
+FileIODir::GetSize()
+{
+	return 0;
+}
+
+void
+FileIODir::Seek( offL_t offset, Error *e )
+{
+}
+
+offL_t
+FileIODir::Tell()
+{
+	return 0;
+}
+
+void
+FileIODir::Fsync( Error *e )
+{
+}
+
+void
+FileIODir::Cleanup()
+{
+	Error e;
+
+	if( IsDeleteOnClose() && Path()->Length() )
+	    PurgeDir( Path()->Text(), &e );
 }
 
 /*

@@ -248,7 +248,7 @@ nt_wname( StrPtr *fname, int lfn, int *newlen )
 	return wname;
 }
 
-int
+time_t
 nt_convtime( SYSTEMTIME *systime )
 {
 	struct tm u_tm;

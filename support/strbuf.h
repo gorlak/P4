@@ -125,6 +125,8 @@ class StrPtr {
 
 	bool	IsNumeric() const;
 
+	int	StartsWith( const char *s, int l ) const;
+
 	int	EndsWith( const char *s, int l ) const;
 
 	P4INT64	Atoi64() const

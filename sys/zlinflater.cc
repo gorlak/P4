@@ -161,7 +161,7 @@ ZLInflater::Fill( char *buf, int len, Error *e )
 	do {
 	    if( zls->avail_in == 0 )
 	    {
-	        zls->next_in = (z_Bytef *)filbuf->Text();
+	        zls->next_in = (Bytef *)filbuf->Text();
 	        zls->avail_in = f->Read( filbuf->Text(), filbuf->Length(), e );
 	        if( e->Test() )
 	            return - 1;
@@ -174,7 +174,7 @@ ZLInflater::Fill( char *buf, int len, Error *e )
 
 	    do {
 	        zls->avail_out = unzbuf->Length();
-		zls->next_out = (z_Bytef *)unzbuf->Text();
+		zls->next_out = (Bytef *)unzbuf->Text();
 
 		zret = inflate( zls, Z_NO_FLUSH );
 		if( zret != Z_OK && zret != Z_STREAM_END )
@@ -229,7 +229,7 @@ ZLDeflater::Write( const char *buf, int l, Error *e )
 	z_stream *zls = (z_stream *)zstrm;
 
 	zls->avail_in = l;
-	zls->next_in = (z_Bytef *)buf;
+	zls->next_in = (Bytef *)buf;
 
 	int done = 0;
 
@@ -247,7 +247,7 @@ ZLDeflater::Write( const char *buf, int l, Error *e )
 	        return;
 
 	    zls->avail_out = workBuf->Length();
-	    zls->next_out = (z_Bytef *)workBuf->Text();
+	    zls->next_out = (Bytef *)workBuf->Text();
 	}
 }
 
@@ -280,7 +280,7 @@ ZLDeflater::Open( Error *e )
 	    return;
 
 	zls->avail_out = workBuf->Length();
-	zls->next_out = (z_Bytef *)workBuf->Text();
+	zls->next_out = (Bytef *)workBuf->Text();
 }
 
 void	
@@ -307,7 +307,7 @@ ZLDeflater::Close( Error *e )
 	        return;
 
 	    zls->avail_out = workBuf->Length();
-	    zls->next_out = (z_Bytef *)workBuf->Text();
+	    zls->next_out = (Bytef *)workBuf->Text();
 	}
 
 	deflateEnd( zls );
@@ -343,7 +343,7 @@ ZLFDeflater::Write( const char *buf, int l, Error *e )
 	z_stream *zls = (z_stream *)zstrm;
 
 	zls->avail_in = l;
-	zls->next_in = (z_Bytef *)buf;
+	zls->next_in = (Bytef *)buf;
 
 	int done = 0;
 
@@ -365,7 +365,7 @@ ZLFDeflater::Write( const char *buf, int l, Error *e )
 	        return;
 
 	    zls->avail_out = workBuf->Length();
-	    zls->next_out = (z_Bytef *)workBuf->Text();
+	    zls->next_out = (Bytef *)workBuf->Text();
 	}
 }
 
@@ -388,7 +388,7 @@ ZLFDeflater::Start( Error *e )
 	zinitDone = 1;
 
 	zls->avail_out = workBuf->Length();
-	zls->next_out = (z_Bytef *)workBuf->Text();
+	zls->next_out = (Bytef *)workBuf->Text();
 }
 
 void	
@@ -419,7 +419,7 @@ ZLFDeflater::Finish( Error *e )
 	        return;
 
 	    zls->avail_out = workBuf->Length();
-	    zls->next_out = (z_Bytef *)workBuf->Text();
+	    zls->next_out = (Bytef *)workBuf->Text();
 	}
 
 	deflateEnd( zls );

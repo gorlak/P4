@@ -110,6 +110,10 @@ FileSys::Create( FileSysType t )
 	case FST_EMPTY:
 	        f = new FileIOEmpty;
 	        break;
+
+	case FST_DIRECTORY:
+	        f = new FileIODir;
+	        break;
 	
 	default:
 		return NULL;
@@ -259,7 +263,7 @@ FileSys::SetDigest( MD5 *m )
 int
 FileSys::DoIndirectWrites()
 {
-# if defined( OS_MACOSX )
+# if defined( OS_MACOSX ) && OS_VER < 1010
 	return ( ( type & FST_MASK ) == FST_SYMLINK );
 # else
 	return 1;
@@ -507,3 +511,16 @@ FileSys::IsUnderPath( const StrPtr &roots )
 	    return UnderRootCheck( n, s, p - s );
 	return 0;
 }
+
+# ifdef HAS_CPP17
+
+namespace std
+{
+	void default_delete< FileSys* >::operator()( FileSys **ptr )
+	{
+	    delete *ptr;
+	    delete ptr;
+	}
+}
+
+# endif

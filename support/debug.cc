@@ -137,6 +137,8 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"dvcs",         0, -1, -1, 10, 1, 1, 0,
 	"graph",        0, -1, -1, 10, 1, 1, 0,
 	"gconn",        0, -1, -1, 10, 1, 1, 0,
+	"fovr",         0, -1, -1, 10, 1, 1, 0,
+	"script",	0, -1, -1, 10, 1, 1, 0,
 
 	// P4Tunable's collection
 	//
@@ -145,7 +147,7 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"cluster.journal.shared",0,	0,	0,	1,	1,	1, 0,
 	"db.isalive",		0,	R10K,	1,	RBIG,	1,	R1K, 0,
 	"db.jnlack.shared",	0,	16,	0,	2048,	1,	B1K, 0,
-	"db.monitor.interval",	0,	0,	0,	900,	1,	1, 0,
+	"db.monitor.interval",	0,	30,	0,	900,	1,	1, 0,
 	"db.monitor.shared",	0,	256,	0,	4096,	1,	B1K, 0,
 	"db.page.migrate",	0,	0,	0,	80,	1,	1, 0,
 	"db.peeking",		0,	2,	0,	3,	1,	1, 0,
@@ -221,11 +223,12 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"dm.user.insecurelogin",0,	0,	0,	1,	1,	1, 0,
 	"dm.user.loginattempts",0,	3,	0,	10000,	1,	1, 0,
 	"dm.user.noautocreate", 0,	0,	0,	2,	1,	1, 0,
+	"dm.user.numeric",	0,	0,	0,	1,	1,	1, 0,
 	"dm.user.resetpassword", 0,	0,	0,	1,	1,	1, 0,
 	"filesys.binaryscan",	0,	B64K,	0,	BBIG,	1,	B1K, 0,
 	"filesys.bufsize",	0,	B4K,	B4K,	B10M,	1,	B1K, 0,
 	"filesys.cachehint",	0,	0,	0,	1,	1,	1, 0,
-	"filesys.checklinks",	0,	0,	0,	3,	1,	1, 0,
+	"filesys.checklinks",	0,	0,	0,	4,	1,	1, 0,
 	"filesys.detectunicode",0,	1,	0,	1,	1,	1, 0,
 	"filesys.detectutf8",	0,	2,	0,	2,	1,	1, 0,
 	"filesys.lockdelay",	0,	300,	1,	RBIG,	1,	1, 0,
@@ -262,6 +265,7 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"net.keepalive.interval",0,	0,	0,	BBIG,	1,	R1K, 0,
 	"net.keepalive.count",	0,	0,	0,	BBIG,	1,	R1K, 0,
 	"net.maxfaultpub",	0,	100,	0,	BBIG,	1,	1, 0,
+	"net.maxclosewait",	0,	1000,	0,	BBIG,	1,	B1K, 0,
 	"net.maxwait",		0,	0,	0,	BBIG,	1,	B1K, 0,
 	"net.parallel.max",	0,	0,	0,	100,	1,	1, 0,
 	"net.parallel.threads",	0,	0,	2,	100,	1,	1, 0,
@@ -312,7 +316,7 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"rpl.labels.global",	0,	0,	0,	1,	1,	1, 0,
 	"rpl.replay.userrp",	0,	0,	0,	1,	1,	1, 0,
 	"rpl.verify.cache",	0,	0,	0,	1,	1,	1, 0,
-	"run.move.allow",	0,	1,	0,	1,	1,	1, 0,
+	"run.move.allow",	0,	1,	0,	2,	1,	1, 0,
 	"run.obliterate.allow",	0,	1,	0,	1,	1,	1, 0,
 	"run.prune.allow",      0,	1,	0,	1,	1,	1, 0,
 	"run.unzip.user.allow", 0,	0,	0,	1,	1,	1, 0,
@@ -373,6 +377,8 @@ P4Tunable::tunable P4Tunable::list[] = {
 	"rpl.submit.nocopy",	0,	0,	0,	1,	1,	1, 0,
 	"auth.2fa.persist",	0,	1,	0,	2,	1,	1, 0,
 	"auth.tickets.nounlocked",0,	0,	0,	2,	1,	1, 0,
+	"auth.sso.allow.passwd",0,	0,	0,	1,	1,	1, 0,
+	"auth.sso.nonldap",	0,	0,	0,	1,	1,	1, 0,
 
 	0, 0, 0, 0, 0, 0, 0, 0
 
@@ -781,10 +787,12 @@ P4Debug::printf( const char *fmt, ... )
 
 	    va_end( l );
 
-# ifdef OS_NT
-	    // Stupid NT vsnprintf returns -1 when the size is too small...
-	    // Unless the size is only 1 byte too small, then it returns sz...
-	    // So we have to iterate getting more space until it works...
+# if defined(OS_NT) && defined(_MSC_VER) && _MSC_VER < 1910
+	    // Depending on the version of Visual Studio, the behavior of
+	    // vsnprintf() may differ.  On versions prior to VS2017, it will
+	    // return -1 when the size is too small, unless the size is only
+	    // 1 byte too small, then it returns sz, so we have to iterate
+	    // getting more space until it works.
 
 	    while( rsz == -1 || rsz == sz )
 	    {

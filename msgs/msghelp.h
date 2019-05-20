@@ -75,6 +75,10 @@ class MsgHelp {
 	static ErrorId HelpEdit;
 	static ErrorId HelpExport;
 	static ErrorId HelpFetch;
+	static ErrorId HelpExtension;
+	static ErrorId HelpExtensionDev;
+	static ErrorId HelpExtensionIntro;
+	static ErrorId HelpFailover;
 	static ErrorId HelpFiles;
 	static ErrorId HelpFilelog;
 	static ErrorId HelpFix;
@@ -248,6 +252,7 @@ class MsgHelp {
 	static ErrorId HelpGraphLfsFetch;
 	static ErrorId HelpGraphLfsStat;
 	static ErrorId HelpGraphVerify;
+	static ErrorId HelpGraphUndo;
 
 	static ErrorId Help2FA;
 

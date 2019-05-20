@@ -501,6 +501,22 @@ Options::OptionInfo Options::list[] = {
 	                      &MsgSupp::OptionReference,
 	"permission",         Options::Perm, 'p', ':',
 	                      &MsgSupp::OptionPerm,
+	"force",              Options::ForceFailover, 'F', 0,
+	                      &MsgSupp::OptionForceFailover,
+	"ignore-master",      Options::IgnoreMaster, 'i', 0,
+	                      &MsgSupp::OptionIgnoreMaster,
+	"require-master",     Options::RequireMaster, 'm', 0,
+	                      &MsgSupp::OptionRequireMaster,
+	"yes",                Options::FailoverYes, 'y', 0,
+	                      &MsgSupp::OptionFailoverYes,
+	"serverid",           Options::Failoverid, 's', ':',
+	                      &MsgSupp::OptionFailoverid,
+	"quiesce-wait",       Options::FailoverQuiesce, 'w', '#',
+	                      &MsgSupp::OptionFailoverQuiesce,
+	"verification",       Options::FailoverVerification, 'v', '#',
+	                      &MsgSupp::OptionFailoverVerification,
+	"install",            Options::Install, 0, ':',
+	                      &MsgSupp::OptionInstall,
 
 	// Options below this line have no short-form equivalent:
 
@@ -597,7 +613,29 @@ Options::OptionInfo Options::list[] = {
 	"drop-index",         Options::DropIndex, 0, 0,
 	                      &MsgSupp::OptionDropIndex,
 	"first-parent",       Options::FirstParent, 0, 0,
-	                      &MsgSupp::OptionDropIndex,
+	                      &MsgSupp::OptionFirstParent,
+	"index",              Options::Index, 0, 0,
+	                      &MsgSupp::OptionIndex,
+	"graph",              Options::Graph, 0, 0,
+	                      &MsgSupp::OptionGraph,
+	"one-parent",         Options::OneParent, 0, 0,
+	                      &MsgSupp::OptionOneParent,
+	"oneline",            Options::Oneline, 0, 0,
+	                      &MsgSupp::OptionOneline,
+	"merges",             Options::Merges, 0, 0,
+	                      &MsgSupp::OptionMerges,
+	"sample",             Options::CreateSampleExtension, 0, ':',
+	                      &MsgSupp::OptionCreateSampleExt,
+	"undo",               Options::Undo, 0, 0,
+	                      &MsgSupp::OptionUndo,
+	"parent-number",      Options::ParentNumber, 0, ':',
+	                      &MsgSupp::OptionParentNumber,
+	"package",             Options::PkgExtension, 0, ':',
+	                      &MsgSupp::OptionPkgExtension,
+	"script",             Options::Script, 0, ':', 0,
+	"script-MaxMem",      Options::ScriptMaxMem, 0, '#', 0,
+	"script-MaxTime",     Options::ScriptMaxTime, 0, '#', 0,
+
 	0, 0, 0, 0, 0
 } ;
 
@@ -878,7 +916,9 @@ Options::ParseLong( int &argc, StrPtr *&argv, const char *opts,
 	        {
 	            if( list[i].optionCode == longOpts[l] )
 	            {
-	                e->Set( *list[i].help );
+	                // Silently ignore options without a long help.
+	                if( list[i].help )
+	                    e->Set( *list[i].help );
 	                break;
 	            }
 	        }
@@ -897,7 +937,7 @@ Options::ParseTest( int &argc, StrPtr *&argv, const char *opts,
 	    char *av = argv[argc - argi].Text();
 
 	    if( av[0] != '-' || !av[1] )
-		break;
+	        continue;      // could be the value of a short option with a ':'
 
 	    if( av[1] == '-' )
 	    {
@@ -968,9 +1008,10 @@ Options::ParseTest( int &argc, StrPtr *&argv, const char *opts,
 		    {
 			vals[ optc++ ] = &opt_e[1];
 		    }
-		    else if( --argc )
+		    else if( argi - 1 )
 		    {
-			vals[ optc++ ] = *++argv;
+			argi--;;
+                        vals[ optc++ ] =  argv[argc - argi];
 		    }
 		    else
 		    {
@@ -1045,9 +1086,10 @@ Options::ParseTest( int &argc, StrPtr *&argv, const char *opts,
 		    {
 			vals[ optc++ ] = &arg[1];
 		    }
-		    else if( --argc )
+		    else if( argi -1 )
 		    {
-			vals[ optc++ ] = *++argv;
+			argi--;;
+			vals[ optc++ ] = argv[argc - argi];
 		    }
 		    else
 		    {
@@ -1172,4 +1214,50 @@ Options::GetOptionValue( int i, StrBuf &sb )
 {
 	if( HasOption( i ) )
 	    sb.Set( vals[i] );
+}
+
+int
+Options::FindCode( const int code, Error *e )
+{
+	for( int ilist = 0; list[ ilist ].name; ilist++ )
+	{
+	    if( list[ ilist ].optionCode == code )
+	    {
+	        return ilist;
+	    }
+	}
+
+	e->Set( MsgSupp::CodeNotFound ) << code;
+
+	return -1;
+}
+
+int
+Options::GetShortForm( const int ilist, Error *e )
+{
+	if( ilist >= 0 && ilist < ( sizeof list / sizeof *list ) )
+	{
+	    return list[ ilist ].shortForm;
+	}
+	else
+	{
+	    e->Set( MsgSupp::BadListIndex ) << ilist;
+
+	    return -1;
+	}
+}
+
+const char *
+Options::GetLongForm( const int ilist, Error *e )
+{
+	if( ilist >= 0 && ilist < ( sizeof list / sizeof *list ) )
+	{
+	    return list[ ilist ].name;
+	}
+	else
+	{
+	    e->Set( MsgSupp::BadListIndex ) << ilist;
+
+	    return 0;
+	}
 }

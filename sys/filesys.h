@@ -214,6 +214,30 @@ class DiskSpaceInfo {
 	StrBuf		*fsType;
 } ;
 
+# ifdef HAS_CPP17
+
+# include <memory>
+
+class FileSys;
+
+// Specialization to the std::default_delete template class so we can store
+// a std::unique_pointer to the FileSys* returned from FileSys::Create without
+// having to know which inherited class it's actually using and without having
+// to use a custom deleter everywhere.
+
+namespace std
+{
+	template<> class default_delete< FileSys* >
+	{
+	    public:
+	        void operator()( FileSys **ptr );
+	};
+}
+
+using FileSysUPtr = std::unique_ptr< FileSys* >;
+
+# endif
+
 class FileSys {
 
     public:
@@ -233,6 +257,22 @@ class FileSys {
 				f->MakeGlobalTemp();
 				return f;
 			}
+
+# ifdef HAS_CPP17
+
+	static FileSysUPtr CreateUPtr( FileSysType type ) {
+				FileSysUPtr f =
+				std::make_unique< FileSys* >( Create( type ) );
+				return f;
+			}
+
+	static FileSysUPtr CreateGlobalTempUPtr( FileSysType type ) {
+				FileSysUPtr f =
+				std::make_unique< FileSys* >( CreateGlobalTemp
+				                              ( type ) );
+				return f;
+			}
+# endif
 
 	// special temp for simple locking
 	static FileSys *CreateLock( FileSys *, Error * );
@@ -390,7 +430,7 @@ class FileSys {
 
 	FileSysType	CheckType( int scan = -1 );
 
-# if defined ( OS_MACOSX )
+# if defined ( OS_MACOSX ) && OS_VER < 1010
 	FileSysType	CheckTypeMac();
 # endif
 
@@ -410,7 +450,7 @@ class FileSys {
 	void		Chmod2( const char *p, Error *e )
 			{ Chmod2( Perm( p ), e ); }
 
-	void		Cleanup();
+	virtual void	Cleanup();
 
 	virtual void	ComputeDigest(
 	                    FileDigestType digType,

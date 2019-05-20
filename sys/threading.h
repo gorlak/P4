@@ -44,6 +44,9 @@
  *			leader to stop; leader calls Process::Cancel()
  *	Threading::Restart() - can be called from any thread to tell the 
  *			leader to restart; leader calls Process::Restart()
+ *	Threading::NoDowngrade() - can be called from any thread to tell the 
+ *			leader that the next restart should not be downgraded
+ *			to a shutdown if threads linger on Windows
  *
  *	Threading::Reap() - called in leader to kill children
  *
@@ -106,13 +109,14 @@ class Threader {
     friend class Threading;
 
 			Threader()
-	                { cancelled = 0; restarted = 0;
+	                { cancelled = 0; restarted = 0; canDowngrade = 1;
 	                  threadCount = 0; process = 0; }
 
 	virtual		~Threader();
 	virtual void	Launch( Thread *t );
 	virtual void	Cancel();
 	virtual void	Restart();
+	virtual void	NoDowngrade();
 	virtual void	Quiesce();
 	virtual void	Reap();
 
@@ -120,6 +124,7 @@ class Threader {
 
 	int		cancelled;
 	int		restarted;
+	int		canDowngrade;
 	Process		*process;
 
 	int		threadCount; // not used by all implementations...
@@ -143,6 +148,7 @@ class Threading {
 
 	static void	Cancel() { if( current ) current->Cancel(); }
 	static void	Restart() { if( current ) current->Restart(); }
+	static void	NoDowngrade() { if( current ) current->NoDowngrade(); }
 	static int	WasCancelled() { if( current ) return current->cancelled; else return 0; }
 	static int	WasRestarted() { if( current ) return current->restarted; else return 0; }
 

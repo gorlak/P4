@@ -46,7 +46,7 @@ FileSys::CheckType( int scan )
 
 	int execbits = fsf & FSF_EXECUTABLE;
 
-# if defined ( OS_MACOSX )
+# if defined ( OS_MACOSX ) && OS_VER < 1010
 
 	if( fsf & FSF_EMPTY )
 	{
@@ -322,7 +322,7 @@ FileSys::CheckType( int scan )
 		!memcmp( buf, comprMagic, sizeof( comprMagic ) ) ) )
 	    return FST_CBINARY;
 
-# if defined ( OS_MACOSX )
+# if defined ( OS_MACOSX ) && OS_VER < 1010
 	{
 	    // binary data + resource == apple
 	    

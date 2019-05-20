@@ -211,7 +211,7 @@ MD5::Final( unsigned char digest[16] )
 void 
 MD5::Transform()
 {
-    register uint32 a, b, c, d;
+    uint32 a, b, c, d;
 #ifdef MD5NOBUF
     MD5BufUnion bufUnion;
     bufUnion.i=(uint32 *)(USE_INBUF==bufSelector?inbuf:oddbuf);

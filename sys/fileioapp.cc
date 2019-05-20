@@ -15,7 +15,7 @@
 # include "pathsys.h"
 # include "applefork.h"
 
-# if !defined ( OS_MACOSX )
+# if !(defined ( OS_MACOSX ) && OS_VER < 1010)
 
 /*
  * FileIOApple -- AppleSingle/Double on non-mac platforms

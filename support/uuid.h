@@ -115,6 +115,7 @@ public:
 	// of this UUID.
 	virtual StrPtr
 	ToStrBuf(StrBuf	&buf) const;
+	bool Parse( const StrBuf& key );
 
 protected:
 

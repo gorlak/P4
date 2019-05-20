@@ -95,10 +95,12 @@ const StrPtr & ClientApi::GetLanguage() { return client->GetLanguage(); }
 const StrPtr & ClientApi::GetOs() { return client->GetOs(); }
 const StrPtr & ClientApi::GetPassword() { return client->GetPassword(); }
 const StrPtr & ClientApi::GetPort() { return client->GetPort(); }
+const StrPtr & ClientApi::GetProg() { return client->GetProg(); }
 const StrPtr & ClientApi::GetUser() { return client->GetUser(); }
 const StrPtr & ClientApi::GetConfig() { return client->GetConfig(); }
 const StrArray* ClientApi::GetConfigs() { return client->GetConfigs(); }
 const StrPtr & ClientApi::GetBuild() { return client->GetBuild(); }
+const StrPtr & ClientApi::GetVersion() { return client->GetVersion(); }
 
 Ignore *ClientApi::GetIgnore() { return client->GetIgnore(); }
 

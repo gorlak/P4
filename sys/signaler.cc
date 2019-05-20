@@ -59,17 +59,24 @@ Signaler::Signaler()
 {
 	Catch();
 
-# ifdef OS_NT
+# if !defined(HAS_CPP11) && defined(OS_NT)
 	hmutex =	CreateMutex( NULL, FALSE, NULL );
-# endif // OS_NT
+# endif
+
+# ifdef HAS_CPP11
+	mutex = 0;
+# endif
 
 	list = 0;
 	disable = 0;
+	isIntr = false;
 }
 
 Signaler::~Signaler()
 {
-# ifdef OS_NT
+	// The following comment also applies to the C++11 std::mutex.
+
+# if !defined(HAS_CPP11) && defined(OS_NT)
 	// This seems like it would be the right thing to do. Unfortunately,
 	// we have a single global Signaler instance, and the methods in it
 	// are called by other global objects. Since the order of destructors
@@ -80,13 +87,47 @@ Signaler::~Signaler()
 	// operating system clean it up when we exit.
 	//
 	// CloseHandle( hmutex );
-# endif // OS_NT
+# endif
 }
+
+# ifdef HAS_CPP11
+
+std::mutex& Signaler::GetMutex()
+{
+	// This isn't thread-safe, but the P4API does a number of things
+	// single-threaded that will cause this to be initialized early
+	// when it's safe.
+
+	if( !mutex )
+	    mutex = new std::mutex;
+
+	return *mutex;
+}
+
+# endif
 
 void
 Signaler::Disable()
 {
 	disable = 1;
+}
+
+void
+Signaler::Enable()
+{
+	disable = 0;
+}
+
+bool
+Signaler::GetState() const
+{
+	return disable;
+}
+
+bool
+Signaler::IsIntr() const
+{
+	return isIntr;
 }
 
 void
@@ -119,10 +160,15 @@ Signaler::OnIntr( SignalFunc callback, void *ptr )
 {
 	if( disable )
 	    return;
-	
+
+# ifdef HAS_CPP11
+	try {
+	std::lock_guard< std::mutex > lock( GetMutex() );
+# else
 # ifdef OS_NT
 	WaitForSingleObject( hmutex, INFINITE );
 # endif // OS_NT
+# endif // HAS_CPP11
 
 	SignalMan *d = new SignalMan;
 
@@ -131,10 +177,15 @@ Signaler::OnIntr( SignalFunc callback, void *ptr )
 	d->ptr = ptr;
 	list = d;
 
-# ifdef OS_NT
+#if !defined(HAS_CPP11) && defined(OS_NT)
 	ReleaseMutex( hmutex );
-# endif // OS_NT
-
+# endif
+# ifdef HAS_CPP11
+	} catch( const std::system_error& e )
+	// Throw away the error since it only shows up on ctrl-c:
+	// "device or resource busy: device or resource busy"
+	{}
+# endif
 }
 
 void
@@ -143,9 +194,14 @@ Signaler::DeleteOnIntr( void *ptr )
 	if( disable )
 	    return;
 
+# ifdef HAS_CPP11
+	try {
+	std::lock_guard< std::mutex > lock( GetMutex() );
+# else
 # ifdef OS_NT
 	WaitForSingleObject( hmutex, INFINITE );
 # endif // OS_NT
+# endif // HAS_CPP11
 
 	SignalMan *p = 0;
 	SignalMan *d = list;
@@ -157,22 +213,31 @@ Signaler::DeleteOnIntr( void *ptr )
 		if( p ) p->next = d->next;
 		else list = d->next;
 		delete d;
-# ifdef OS_NT
+
+# if !defined(HAS_CPP11) && defined(OS_NT)
 		ReleaseMutex( hmutex );
-# endif // OS_NT
+# endif
 		return;
 	    }
 	}
 
-# ifdef OS_NT
+# if !defined(HAS_CPP11) && defined(OS_NT)
 	ReleaseMutex( hmutex );
-# endif // OS_NT
+# endif
+# ifdef HAS_CPP11
+	} catch( const std::system_error& e )
+	// Throw away the error since it only shows up on ctrl-c:
+	// "device or resource busy: device or resource busy"
+	{}
+# endif
 
 }
 
 void
 Signaler::Intr()
 {
+	isIntr = true;
+
 	if( disable )
 	    return;
 
@@ -182,9 +247,14 @@ Signaler::Intr()
 
 	signal( SIGINT, SIG_TYPECAST( istat ) );
 
+# ifdef HAS_CPP11
+	try {
+	std::lock_guard< std::mutex > lock( GetMutex() );
+# else
 # ifdef OS_NT
 	WaitForSingleObject( hmutex, INFINITE );
 # endif // OS_NT
+# endif // HAS_CPP11
 
 	while( d )
 	{
@@ -196,7 +266,14 @@ Signaler::Intr()
 	    p->callback( p->ptr );
 	}
 
-# ifdef OS_NT
+# if !defined(HAS_CPP11) && defined(OS_NT)
 	ReleaseMutex( hmutex );
-# endif // OS_NT
+# endif
+# ifdef HAS_CPP11
+	} catch( const std::system_error& e )
+	// Throw away the error since it only shows up on ctrl-c:
+	// "device or resource busy: device or resource busy"
+	{}
+# endif
+
 }

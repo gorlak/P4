@@ -53,6 +53,7 @@ int commandChaining = 0; // can be set by clientmain to support '-x run'
 ClientUser::~ClientUser()
 {
     delete transfer;
+    delete ssoHandler;
 }
 
 /*
@@ -861,6 +862,12 @@ void
 ClientUser::SetTransfer( ClientTransfer* t )
 {
 	transfer = t;
+}
+
+void
+ClientUser::SetSSOHandler( ClientSSO* s )
+{
+	ssoHandler = s;
 }
 
 void

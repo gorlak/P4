@@ -22,6 +22,9 @@
  *  header files.
  */
 
+# ifndef P4STDHDRS_H
+# define P4STDHDRS_H
+
 # ifdef OS_VMS
 # define _POSIX_EXIT  // to get exit status right from stdlib.h
 # endif	
@@ -66,6 +69,7 @@
  * NEED_STATVFS - statvfs()
  * NEED_SOCKETPAIR - pipe(), socketpair()
  * NEED_SOCKET_IO - various socket stuff
+ * NEED_SRWLOCK - headers for authwinldapconn.cc
  * NEED_SYSLOG - syslog()
  * NEED_TIME - time(), etc
  * NEED_TIME_HP - High Precision time, such as gettimeofday, clock_gettime, etc.
@@ -101,13 +105,14 @@
 # if defined( NEED_BRK )
 # if !defined( OS_NT ) && !defined( MAC_MWPEF ) && \
      !defined( OS_AS400 ) && !defined( OS_MVS ) && \
-     !defined( OS_LINUX ) && !defined( OS_DARWIN )
+     !defined( OS_LINUX ) && !defined( OS_DARWIN ) && \
+     !defined( OS_MACOSX )
 # define HAVE_BRK
 # endif
 # endif
 
 # if defined( NEED_LSOF )
-# if defined( OS_LINUX ) || defined( OS_DARWIN )
+# if defined( OS_LINUX ) || defined( OS_DARWIN ) || defined( OS_MACOSX )
 # define HAVE_LSOF
 # endif
 # endif
@@ -173,6 +178,24 @@ extern int errno;
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 # endif // NEED_CRITSEC
+# endif // OS_NT
+
+// Definitions for AcquireSRWLock and ReleaseSRWLock.
+//
+# ifdef OS_NT
+# define HAVE_SRWLOCK
+# ifdef NEED_SRWLOCK
+# if (_MSC_VER >= 1800)
+# undef _WIN32_WINNT
+# define _WIN32_WINNT 0x0600
+# endif // _MSC_VER
+# include <windows.h>
+# include <winldap.h>
+# include <winber.h>
+# include <wincrypt.h>
+# include <rpc.h>
+# include <rpcdce.h>
+# endif // NEED_SRWLOCK
 # endif // OS_NT
 
 # ifdef OS_NT
@@ -371,8 +394,7 @@ extern "C" int __stdcall gethostname( char * name, int namelen );
 # include <sys/statfs.h>
 # endif
 
-# if defined(OS_DARWIN80) || defined(OS_DARWIN90) || defined(OS_DARWIN100) \
-  || defined(OS_FREEBSD)
+# if defined(OS_DARWIN) || defined(OS_MACOSX) || defined(OS_FREEBSD)
 # define HAVE_STATFS
 # define HAVE_STATFS_FSTYPENAME
 # include <sys/param.h>
@@ -391,7 +413,7 @@ extern "C" int __stdcall gethostname( char * name, int namelen );
 	!defined( OS_NEXT ) && !defined( OS_NT ) && \
 	!defined( OS_QNX ) && !defined( OS_UNICOS ) && \
 	!defined( OS_MPEIX ) && !defined( OS_QNXNTO ) && \
-	!defined( OS_MACOSX ) && !defined( OS_ZETA ) && \
+	!defined( OS_ZETA ) && \
 	!defined( OS_AIX53 ) && !defined( OS_LINUXIA64 )
 
 # define HAVE_MMAP
@@ -481,6 +503,7 @@ extern "C" int socketpair(int, int, int, int*);
 # if defined(NEED_TIME_HP)
 #    if defined( OS_LINUX )
 #       define HAVE_CLOCK_GETTIME
+#if defined(__GLIBC__) && defined(__GLIBC_PREREQ)
 #       if ( __GLIBC_PREREQ( 2, 10 ) && \
              ( defined(_BSD_SOURCE) || \
                _XOPEN_SOURCE >= 700  || \
@@ -493,6 +516,9 @@ extern "C" int socketpair(int, int, int, int*);
 #           define HAVE_GETTIMEOFDAY
 #           include <sys/time.h>
 #       endif
+#else
+#            define HAVE_UTIMENSAT
+#endif
 #    elif defined( OS_NT )
 #       define WIN32_LEAN_AND_MEAN
 #       include <windows.h>
@@ -635,8 +661,8 @@ int truncate(const char *path, off_t length);
 #     define HAVE_PTHREAD
 #     include <pthread.h>
 #   endif
-#   if defined( OS_DARWIN ) || \
-       defined( OS_MACOSX )
+#   if ( defined( OS_DARWIN ) && OS_VER < 140 ) || \
+       ( defined( OS_MACOSX ) && OS_VER < 1010 )
 #     define MT_STATIC static
 #   else
 #     define MT_STATIC static __thread
@@ -705,7 +731,7 @@ typedef P4INT64 offL_t;
 
 typedef unsigned int p4size_t;
 
-# ifdef OS_MACOSX
+# if defined(OS_MACOSX) && OS_VER < 1010
 # define FOUR_CHAR_CONSTANT(_a, _b, _c, _d)       \
         ((UInt32)                                 \
         ((UInt32) (_a) << 24) |                   \
@@ -722,3 +748,22 @@ typedef unsigned int p4size_t;
 # define vsnprintf _vsnprintf 
 # endif
 
+// C++11 or higher
+# if __cplusplus >= 201103L
+#   define HAS_CPP11
+# endif
+
+// C++17 or higher
+# if __cplusplus >= 201703L
+#   define HAS_CPP17
+# endif
+
+# ifdef HAS_CPP11
+#   define HAS_PARALLEL_SYNC_THREADS
+# endif
+
+# ifdef HAS_CPP17
+#   define HAS_EXTENSIONS
+# endif
+
+# endif // P4STDHDRS_H

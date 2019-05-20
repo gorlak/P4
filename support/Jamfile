@@ -1,6 +1,7 @@
 SubDir P4 support ;
 
 SubDirHdrs $(P4) i18n ;
+SubDirHdrs $(P4) jsmn ;
 SubDirHdrs $(P4) map ;
 SubDirC++Flags -I$(SSLINCDIR) ;
 
@@ -62,6 +63,7 @@ P4Library $(SUPPORTLIB) :
 	strxml.cc
 	ticket.cc
 	tracker.cc
+	utils.cc
 	uuid.cc
 	uuidweak.cc
 #	uuidstrong.cc

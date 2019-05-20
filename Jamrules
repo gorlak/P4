@@ -19,7 +19,6 @@
 #	Section 11. Unit test rules
 #	Section 12. Per-platform actions.
 #	Section 13. Useful miscellanea
-#
 
 #################################################
 #
@@ -30,11 +29,15 @@
 	#
 	# Special Rules
 	#
+	# ObjectCCFlags              - C version of ObjectC++Flags
 	# FRemoveAny x : y ;         - return new array of x minus any values in y
+	# FRegexpQuote list ;        - quote regexp metacharacters into literals
 	# FSplit s : delim ;         - split string at delim (default /)
 	# FStringToList s ;          - return a list of chars from string
 	# FLengthCmp s1 : s2 ;       - compare length of strings
 	# FVersionCmp x : y ;        - compare version numbers (e.g. 3.4 vs. 4.5)
+	# FDirEntries path : pat ;   - return a list of files matching pat in path
+	# FileIsDir x ;              - returns just those elements that are existing directories
 	# OnTargetVarPrepend TARGET  : VARIABLE : VALUES ;
 	# OnTargetVarAppend  TARGET  : VARIABLE : VALUES ;
 	# OnTargetVarDelete  TARGET  : VARIABLE : VALUES ;
@@ -50,6 +53,11 @@
 	#                              say object/depot.cpp
 	#
 
+	rule ObjectCCFlags
+	{
+		CCFLAGS on [ FGristFiles $(<:S=$(SUFOBJ)) ] += $(>) ;
+	}
+
 	rule FRemoveAny
 	{
 		# Usage: y = [ FRemoveAny $(x) : v1 v2 ... ] ;
@@ -61,6 +69,38 @@
 			if ! ( $(_elt) in $(2) ) { _new += $(_elt) ; }
 		}
 		return $(_new) ;
+	}
+
+	rule FRegexpQuote
+	{
+		# FRegexpQuote list ;
+		# Quote any egrep(1) regexp metacharacters in elements of
+		# list such that they will only match a literal expression.
+		# Returns the quoted list.
+		local result ;
+		local p ;
+
+		for p in $(<)
+		{
+			local q ;
+
+			while (1)
+			{
+				local r = [ Match ^([^][()*+.?\\]*)([][()*+.?\\])(.*) : $(p) ] ;
+				q += $(r[1]) ;
+				if $(r[2]) = ""
+				{
+					q += $(p) ;
+					break ;
+				}
+				q += \\$(r[2]) ;
+				p = $(r[3]) ;
+			}
+
+			result += $(q:J=) ;
+		}
+
+		return $(result) ;
 	}
 
 	rule FSplit
@@ -140,6 +180,40 @@
 			b = $(b[2-]) ;
 		}
 		return 0 ;
+	}
+
+	rule FDirEntries
+	{
+		# Usage: files = [ FDirEntries path to directory : pat ] ;
+		# Returns list of entries in directory which match pat (default '*')
+
+		local dir = [ FDirName $(<) ] ;
+		local pat = $(>) ;
+		if ! $(pat) { pat = "*" ; }
+
+		local ents = [ Glob $(dir) : $(pat) ] ;             # => d/. d/.. d/a d/b
+		# We need to quote windows directories because they use
+		# backslashes, and those are regexp metacharacters.
+		# Safer on unix too.
+		local re   = [ FRegexpQuote $(dir)$(SLASH) ] ;
+		ents = [ Match $(re)(.*) : $(ents) ] ;              # => . .. a b
+		return [ FRemoveAny $(ents) : $(DOT) $(DOTDOT) ] ;  # return minus . and ..
+	}
+
+	rule FileIsDir
+	{
+		# Returns a list of just those elements that are names of existing directories
+		local result ;
+		local f ;
+
+		for f in $(1)
+		{
+			if [ Glob $(f) : $(DOT) ]
+			{
+				result += $(f) ;
+			}
+		}
+		return $(result) ;
 	}
 
 	# Rules for modifying target-specific variables.
@@ -323,6 +397,7 @@
 			# support making it an error, so we can't use -Werror=return-type
 			C++FLAGS += -Wreturn-type ;
 			LINK = $(OSLINK:E=$($(linker))) ;
+			LINK = $(prefix)g++$(suffix) ;
 		}
 
 		STRIP  = $(CROSS_COMPILE:E)strip   ;
@@ -337,20 +412,18 @@
 		# Determine correct version and location of SDK to use, and arch flags.
 
 		local _legacy  = /Developer ; # sdk10.6 and earlier
-		# sdk10.7 - sdk10.11 live deep under Xcode.app
+		# sdk10.7 and above live deep under Xcode.app
 		local _xcode   = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform ;
-		local _cltools = /Library/Developer/CommandLineTools ; # sdk 10.12 (and later?)
 		local _prefix  = $(_legacy) ;
 
 		local _sdkver  = $(1:J=.) ;   # Override computed sdk version
 		local _xflags  = $(2) ;       # additional flags to compiler+linker
 		local _uplats  = $(3:E=i386 x86_64) ;  # platforms for "universal" builds
 
-		switch $(OS:U)
+        switch $(OS:U)
 		{
 		case DARWIN :
-			if      [ FVersionCmp $(OSVER) : 160 ] >= 0 { _prefix = $(_cltools) ; }
-			else if [ FVersionCmp $(OSVER) : 110 ] >= 0 { _prefix = $(_xcode)$(_legacy) ; }
+			if [ FVersionCmp $(OSVER) : 110 ] >= 0 { _prefix = $(_xcode)$(_legacy) ; }
 
 			local _v = [ MATCH ([0-9]+)[0-9]$ : $(OSVER) ] ;
 			# darwin:       1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
@@ -358,13 +431,18 @@
 			_sdkver ?= 10.$(_sdkmap[$(_v)]) ;
 
 		case MACOSX :
-			if      [ FVersionCmp $(OSVER) : 1012 ] >= 0 { _prefix = $(_cltools) ; }
-			else if [ FVersionCmp $(OSVER) : 107  ] >= 0 { _prefix = $(_xcode)$(_legacy) ; }
+			if [ FVersionCmp $(OSVER) : 107  ] >= 0 { _prefix = $(_xcode)$(_legacy) ; }
 
 			local _v = [ MATCH ([0-9][0-9])([0-9]*)$ : $(OSVER) ] ;
 			_sdkver ?= $(_v:J=.) ;
 		}
 		if $(_sdkver) = 10.4 { _sdkver = $(_sdkver)u ; }  # "10.4u.sdk"
+
+		if ! [ FileIsDir $(_prefix) ]
+		{
+			local _cltools = /Library/Developer/CommandLineTools ;
+			if [ FileIsDir $(_cltools) ] { _prefix = $(_cltools) ; }
+		}
 
 		MACOSX_SDK       ?= $(_prefix)/SDKs/MacOSX$(_sdkver).sdk ;
 		MACOSX_SDK_FLAGS ?= -isysroot $(MACOSX_SDK) ;
@@ -386,6 +464,90 @@
 		# you can now specify a different default at runtime on any platform.
 		$(GENFLAGS) += $(MACOSX_SDK_FLAGS) $(_arch) -DCASE_INSENSITIVE  $(_xflags) ;
 		LINKFLAGS   += $(MACOSX_SDK_FLAGS) $(_arch) $(_xflags) ;
+	}
+
+	# Tell Clang/GCC/VisualStudio which version of the language to use.
+	# Useful for enforcing an upper-bound on the language used in the code.
+	# Note that we define no equivalent for the C language.  Note that if the
+	# version of the compiler doesn't support the flag to set the standard or
+	# the value passed in is invalid or the compiler version is not defined,
+	# this function is a NOOP.
+
+	_has_warned_set_compiler_flag = 0 ;
+
+	rule C++FLAGS+STD
+	{
+	    local std = $(1) ;
+	    local rv = $(C++_VERSION_BASELINE:E) ;
+	    local result = [ FRemoveAny $(C++FLAGS) : -std=$(rv) /std:$(rv) ] ;
+
+	    # c++N -> N
+	    local stdl = [ FStringToList $(std) ] ;
+	    local vsl = $(stdl[4-]) ;
+	    local vs = $(vsl:J="") ;
+
+	    # todo: cc is 'cl /nologo' on Windows
+	    # Assume an incompatible compiler if the version isn't declared.
+	    if $(CC) = clang && ! $(CLANGVER) || $(CC) = gcc && ! $(GCCVER)
+	       || $(CC) = cl && ! $(MSVSVER)
+	    {
+	        if $(_has_warned_set_compiler_flag) = 0
+	        { echo "Please define CLANGVER/GCCVER/MSVSVER." ; }
+	        _has_warned_set_compiler_flag = 1 ;
+	        return $(result) ;
+	    }
+
+	    # GCC/VS didn't always support setting the language
+	    # standard, and at least in GCC's case, the name of the
+	    # standard used by one version doesn't always match what
+	    # the standard is called in later versions - e.g. c++0x vs
+	    # c++11.
+	    #
+	    # https://gcc.gnu.org/onlinedocs/
+	    # https://gcc.gnu.org/onlinedocs/gcc-4.2.4/gcc/C-Dialect-Options.html#lndex-ISO-support-95 -std=c++98
+	    # https://msdn.microsoft.com/en-us/library/mt490614.aspx
+	    #
+	    # The std flag was unavailable in these versions:
+
+	    if $(GCCVER) && [ FVersionCmp $(GCCVER) : 4.2.0 ] < 0 ||
+	       $(MSVSVER) && [ FVersionCmp $(MSVSVER) : 14 ] < 0
+	    { return $(result) ; }
+
+	    if $(CLANGVER)
+	    {
+	        # Just handle this version for now since it's what's on
+		# the build host.
+	        if [ FVersionCmp $(CLANGVER) : 6.0.0 ] < 0 && $(vs) > 14
+	        { return $(result) ; }
+	    }
+
+	    if $(GCCVER)
+	    {
+	        if [ FVersionCmp $(GCCVER) : 4.6.0 ] < 0 && $(vs) < 98 ||
+	           [ FVersionCmp $(GCCVER) : 4.7.0 ] < 0 && $(vs) > 11 ||
+	           [ FVersionCmp $(GCCVER) : 6.4.0 ] < 0 && $(vs) > 14 ||
+	           [ FVersionCmp $(GCCVER) : 7.3.0 ] < 0 && $(vs) > 17
+	        { return $(result) ; }
+	    }
+
+	    if $(MSVSVER)
+	    {
+	        if [ FVersionCmp $(MSVSVER) : 14 ] <= 0 && $(vs) > 14 ||
+		   [ FVersionCmp $(MSVSVER) : 15 ] <= 0 && $(vs) > 17 ||
+	             $(vs) < 14
+	        { return $(result) ; }
+	    }
+
+	    if $(OS) = NT && $(MSVSVER)
+	    {
+	            result += /std:$(std) ;
+	    }
+	    else
+	    {
+	            result += -std=$(std) ;
+	    }
+
+	    return $(result) ;
 	}
 
 #################################################
@@ -539,7 +701,8 @@
 		OS_$(OS)
 		OS_$(OS)$(OSVER)
 		OS_$(OS)$(OSPLAT:U)
-		OS_$(OS)$(OSVER)$(OSPLAT:U) ;
+		OS_$(OS)$(OSVER)$(OSPLAT:U)
+		"OS_VER=$(OSVER:E=0)" ;
 
 	HDRS +=
 		[ FSubDirPath P4 msgs ]
@@ -559,13 +722,15 @@
 		QT_LIBINFIX ?= P4 ;
 	}
 
-	# The default, if linking with stdc++, is to dynamically link unless a specific platform overrides as static.
+	# The default, if linking with stdc++, is to dynamically link unless a
+	# specific platform overrides as static.  Note that this is overloaded
+	# to include LLVM/Clang's libc++.
 	STATIC_LIBSTDC++ = no ;
 	# This really ought to be renamed LINK_WITH_STL since some operating systems use a different name.
- 	LINK_WITH_STDC++ = p4d p4p p4broker p4broker_ja p4zk p4sandbox p4sandbox_ja p4vc ;
+ 	LINK_WITH_STDC++ = p4 p4d p4p p4broker p4broker_ja p4zk p4sandbox p4sandbox_ja p4vc browsechild mkconf p4dvcsapi p4api perfmerge perfsplit p4migrate ;
 
 	# Some parts of libsupp now require symbols from pthread
-	LINK_WITH_PTHREAD = p4d p4p p4broker p4broker_ja p4sandbox p4sandbox_ja p4ftpd ;
+	LINK_WITH_PTHREAD = p4 p4d p4p p4broker p4broker_ja p4sandbox p4sandbox_ja p4ftpd browsechild p4api p4dvcsapi ;
 
 	# SSL configuration:
 	# Define SSL to include netssl* source code into the libraries and executables
@@ -710,6 +875,9 @@
 	SetLibName SANDSTORM        : libstorm      ;
 	SetLibName P4VSHELL         : libp4vshell   ;
 	SetLibName P4ALIB           : libp4a        ;
+	SetLibName P4SCRIPT         : libp4script   ;
+	SetLibName P4SCRIPT_CURL    : libp4script_curl ;
+	SetLibName P4SCRIPT_SQLITE  : libp4script_sqlite ;
 	SetLibName P4V              : libp4v        ;
 	SetLibName P4VPRIMITIVES    : libp4vprimitives ;
 	SetLibName P4VC             : libp4vc       ;
@@ -1219,9 +1387,10 @@
 
 	case MACOSX10* :  # 10.9 and above
 		SetCommonCompiler $(OSCOMP:E=clang) ;
-		SetOSXSdk : -mmacosx-version-min=10.5 -fwrapv ;
+		SetOSXSdk 10.12 : -mmacosx-version-min=10.10 -fwrapv ;
 
-		LIBRARY_DEPOLYMENT_SDK = sdk10.5 ;
+		LIBRARY_DEPOLYMENT_SDK = sdk10.12 ;
+		STATIC_LIBSTDC++ = yes ;
 
 		# The -fvisibility-inlines-hidden option is a C++-only
 		# option, needed because Qt4 is built with it and all
@@ -1478,7 +1647,7 @@
 		case g :
 			# Debugging build
 
-			OPTIM = $(_Z) /Gm ;
+			OPTIM = $(_Z) ;
 			RCFLAGS      = /d DEBUG /r ;
 			LINKFLAGS   += /DEBUG ;
 			if $(SMARTHEAP) = yes
@@ -1789,8 +1958,6 @@
 	#
 	# Special Rules
 	#
-	# FRegexpQuote list ;       - quote regexp metacharacters into literals
-	# FDirEntries path : pat ;  - return a list of files matching pat in path
 	# DefineVar src : var ;     - define a var for src compilation
 	# Ident exe ;               - define bits for program ident string
 	# ListAC ??? ;
@@ -1807,72 +1974,6 @@
 	# MkDistArchive file : directory ; calls appropriate action based on file extension
 	# MakeP4ObjCdist file ; Create Objective C API package
 	# MakeP4DTGdist file ; Create p4dtg package
-
-	rule FRegexpQuote
-	{
-		# FRegexpQuote list ;
-		# Quote any egrep(1) regexp metacharacters in elements of
-		# list such that they will only match a literal expression.
-		# Returns the quoted list.
-		local result ;
-		local p ;
-
-		for p in $(<)
-		{
-			local q ;
-
-			while (1)
-			{
-				local r = [ Match ^([^][()*+.?\\]*)([][()*+.?\\])(.*) : $(p) ] ;
-				q += $(r[1]) ;
-				if $(r[2]) = ""
-				{
-					q += $(p) ;
-					break ;
-				}
-				q += \\$(r[2]) ;
-				p = $(r[3]) ;
-			}
-
-			result += $(q:J=) ;
-		}
-
-		return $(result) ;
-	}
-
-	rule FDirEntries
-	{
-		# Usage: files = [ FDirEntries path to directory : pat ] ;
-		# Returns list of entries in directory which match pat (default '*')
-
-		local dir = [ FDirName $(<) ] ;
-		local pat = $(>) ;
-		if ! $(pat) { pat = "*" ; }
-
-		local ents = [ Glob $(dir) : $(pat) ] ;             # => d/. d/.. d/a d/b
-		# We need to quote windows directories because they use
-		# backslashes, and those are regexp metacharacters.
-		# Safer on unix too.
-		local re   = [ FRegexpQuote $(dir)$(SLASH) ] ;
-		ents = [ Match $(re)(.*) : $(ents) ] ;              # => . .. a b
-		return [ FRemoveAny $(ents) : $(DOT) $(DOTDOT) ] ;  # return minus . and ..
-	}
-
-	rule FileIsDir
-	{
-		# Returns a list of just those elements that are names of existing directories
-		local result ;
-		local f ;
-
-		for f in $(1)
-		{
-			if [ Glob $(f) : $(DOT) ]
-			{
-				result += $(f) ;
-			}
-		}
-		return $(result) ;
-	}
 
 	rule DefineVar
 	{
@@ -1989,10 +2090,39 @@
 		{
 			if $(STATIC_LIBSTDC++) = yes
 			{
-				local _lib = -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic ;
-
-				OnTargetVarDelete $(<)$(SUFEXE) : LINKLIBS : -lsupc++ ;
-				OnTargetVarAppend $(<)$(SUFEXE) : LINKLIBS : $(_lib)  ;
+				if $(GCCVER) && [ FVersionCmp $(GCCVER) : 4.5.4 ] >= 0
+				{
+				    local _lib = -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic -l:libstdc++.a ;
+				    local _flag = -static-libstdc++ -static-libgcc ;
+				    OnTargetVarDelete $(<)$(SUFEXE) : LINKLIBS : -lsupc++ ;
+				    OnTargetVarAppend $(<)$(SUFEXE) : LINKLIBS : $(_lib)  ;
+				    OnTargetVarAppend $(<)$(SUFEXE) : LINKFLAGS : $(_flag) ;
+				    OnTargetVarAppend $(<)$(SUFEXE) : C++FLAGS : $(_flag) ;
+				}
+				else
+				if $(CLANGVER) && $(OS:U) = MACOSX &&
+				   [ FVersionCmp $(CLANGVER) : 6.0.0 ] >= 0 && 0
+				{
+				    # Require 'production' here since normal dev builds will work
+				    # fine without specifying LIBC++DIR and we want that flexibility.
+				    if $(PRODUCTION)
+				    {
+				        if ! $(LIBC++DIR)
+				        {
+				            echo "Must set the LIBC++DIR variable to point to the directory containing libc++.a and libc++abi.a" ;
+				            exit ;
+				        }
+				        local _lib = $(LIBC++DIR)$(SLASH)libc++.a $(LIBC++DIR)$(SLASH)libc++abi.a ;
+				        OnTargetVarPrepend $(<)$(SUFEXE) : LINKLIBS : $(_lib)  ;
+				        LINKFLAGS += -L $(LIBC++DIR) ;
+				    }
+				}
+				else
+				{
+				    local _lib = -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic ;
+				    OnTargetVarDelete $(<)$(SUFEXE) : LINKLIBS : -lsupc++ ;
+				    OnTargetVarAppend $(<)$(SUFEXE) : LINKLIBS : $(_lib)  ;
+				}
 			}
 			else
 			{
@@ -2595,7 +2725,7 @@
 		MakeLocate $(dirname) : $(exec_dir) ;
 		Depends p4php-dist : $(dirname) ;
 
-		local excludes = docs [ FDirEntries $(AllP4) p4-php : Jam* *~ ] ;
+		local excludes = docs jenkins sanity_test [ FDirEntries $(AllP4) p4-php : Jam* *~ .* ] ;
 		CopyRec p4php-dist : $(topdir)              : $(AllP4) p4-php : $(excludes) ;
 		CopyRec p4php-dist : $(topdir) RELNOTES.txt : $(AllP4) p4-doc user p4phpnotes.txt ;
 		CopyRec p4php-dist : $(topdir) Version      : $(AllP4) p4 Version ;
@@ -2806,20 +2936,26 @@
 		{
 		case NT-*-X*-* :
 			local _64 = "32" ;
-			local   d = "" ;
+			local d = "" ;
+			local vsver = "" ;
 			if $(OSPLAT) = X64 { _64 = 64 ; }
 			if $(TYPE_DEBUG) { d = d ; }
+			if [ FVersionCmp $(MSVSVER) : 15 ] = 0 { vsver = vs$(MSVSVER)$(SLASH) ; }
 			if $(SMARTHEAP_CHECKS) != 0 || $(MEM_DEBUG) = yes
 			{
-				SMARTHPLIB ?= $(EXEC_LIB)\\shdw$(_64)Mtd.lib ;
+				SMARTHPLIB = $(EXEC_LIB)$(SLASH)$(vsver)shdw$(_64)Mtd.lib ;
 			}
 			else
 			{
-			SMARTHPLIB ?= $(EXEC_LIB)\\shlSMP$(_64)Mt$(d).lib ;
+				SMARTHPLIB = $(EXEC_LIB)$(SLASH)$(vsver)shlSMP$(_64)Mt$(d).lib ;
+			}
+			if [ FVersionCmp $(MSVSVER) : 15 ] = 0
+			{
+				SMARTHPLIB += $(EXEC_LIB)$(SLASH)$(vsver)shvs14_$(_64).lib ;
 			}
 
 			local e = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-			OnTargetVarPrepend $(e) : LINKLIBS : $(SMARTHPLIB) ;
+			OnTargetVarAppend $(e) : LINKLIBS : $(SMARTHPLIB) ;
 
 		case LINUX-*-X86*-* :
 			local _64 = "" ;
@@ -2835,7 +2971,7 @@
 			              $(EXEC_LIB)/libsmartheap$(_64).a ;
 			}
 
-			OnTargetVarPrepend $(<) : LINKLIBS : $(SMARTHPLIB) ;
+			OnTargetVarAppend $(<) : LINKLIBS : $(SMARTHPLIB) ;
 
 			# Ignore a couple of duplicate symbol definitions in
 			# exception handler code between some of the smartheap 9.01
@@ -3048,9 +3184,9 @@
 	rule P4GTLinkage
 	{
 		local _def = [ on $(<) return $(DEFFILE) ] ;
+#		            /DEF:$(_def)
 		local _lf = /subsystem:windows
 		            /DLL
-		            /DEF:$(_def)
 		            /INCREMENTAL:NO
 		            /MACHINE:$(OSPLAT:L) ;
 
@@ -3377,7 +3513,7 @@
 	}
 
 	actions WinRc {
-		rc /nologo /fo $(<) $(RCFLAGS) "$(RCHDRS)" $(>)
+		rc /fo $(<) $(RCFLAGS) "$(RCHDRS)" $(>)
 	}
 
 

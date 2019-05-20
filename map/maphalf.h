@@ -149,6 +149,8 @@ class MapHalf : public StrBuf {
 
 	void		SetCaseMode( int caseMode );
 
+	void		SanitizeStars( Error *e );
+
     private:
 
 	void		FindParams( char *params, Error *e );

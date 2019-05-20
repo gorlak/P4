@@ -22,7 +22,7 @@
  * When adding a new error make sure its greater than the current high
  * value and update the following number:
  *
- * Current high value for a MsgSpec error code is: 18
+ * Current high value for a MsgSpec error code is: 19
  */
 
 # include <error.h>
@@ -64,8 +64,6 @@ ErrorId MsgSpec::SpecClient = { ErrorOf( ES_SPEC, 2, E_INFO, EV_NONE, 0  ),
 "#                      %'leaveunchanged/leaveunchanged+reopen'%\n"
 "#  %'LineEnd'%:     Text file line endings on client: %'local/unix/mac/win/share'%.\n"
 "#  %'Type'%:        Type of client: %'writeable/readonly/graph/partitioned'%.\n"
-"#  %'Backup'%:      Client's participation in backup %'enable/disable'%. If not\n"
-"#               specified backup of a writable client defaults to enabled.\n"
 "#  %'ServerID'%:    If set, restricts access to the named server.\n"
 "#  %'View'%:        Lines to map depot files into the client workspace.\n"
 "#  %'ChangeView'%:  Lines to restrict depot files to specific changelists.\n"
@@ -225,7 +223,8 @@ ErrorId MsgSpec::SpecDepot = { ErrorOf( ES_SPEC, 5, E_INFO, EV_NONE, 0  ),
 "#  %'Description'%: A short description of the depot (optional).\n"
 "#  %'Type'%:        Whether the depot is '%'local'%', '%'remote'%',\n"
 "#               '%'stream'%', '%'spec'%', '%'archive'%', '%'tangent'%',\n"
-"#               '%'unload'%' or '%'graph'%'.  Default is '%'local'%'.\n"
+"#               '%'unload'%', '%'extension'%' or '%'graph'%'.\n"
+"#               Default is '%'local'%'.\n"
 "#  %'Address'%:     Connection address (remote depots only).\n"
 "#  %'Suffix'%:      Suffix for all saved specs (spec depot only).\n"
 "#  %'StreamDepth'%: Depth for streams in this depot (stream depots only).\n"
@@ -362,11 +361,17 @@ ErrorId MsgSpec::SpecServer = { ErrorOf( ES_SPEC, 15, E_INFO, EV_NONE, 0  ),
 "#               %'local'%: personal server created by %'init'%\n"
 "#        Type %''broker''%:\n"
 "#               %'broker'%: %'p4broker'% process\n"
-"#               %'workspace-router'%: Routing %'broker'% in data center installation\n"
 "#        Type %''proxy''%:\n"
 "#               %'proxy'%: %'p4p'% caching proxy\n"
 "#        Type %''connector''%:\n"
 "#               %'git-connector'%: %'p4gconn'% caching proxy\n"
+"#\n"
+"#  %'Options'%:     Server options: %'[no]mandatory'%.\n"
+"#  %'ReplicatingFrom'%:\n"
+"#               Server ID of the server from which this server is\n"
+"#               replicating or %'journalcopy'ing'%. This field is required\n"
+"#               when the server is a %'standby'% or %'forwarding-standby'%\n"
+"#               server and the %'mandatory'% option is set for either.\n"
 "#  %'User'%:        The service user which will be used by this server\n"
 "#  %'AllowedAddresses'%:\n"
 "#               A list of addresses that are valid this server.  At security\n"
@@ -402,7 +407,7 @@ ErrorId MsgSpec::SpecServer = { ErrorOf( ES_SPEC, 15, E_INFO, EV_NONE, 0  ),
 "#               are run on the current server using the scope of the\n"
 "#               ServerID server.\n"
 "#\n"
-"# Use '%'p4 help server'%' to see more about server ids and services.\n" };
+"# Use '%'p4 help server'%' to see more about server ids, services, and options.\n" };
 
 ErrorId MsgSpec::SpecTrigger = { ErrorOf( ES_SPEC, 8, E_INFO, EV_NONE, 0  ),
 "# %'Perforce Submit'% and Form Validating Trigger Specifications.\n"
@@ -516,7 +521,7 @@ ErrorId MsgSpec::SpecUser = { ErrorOf( ES_SPEC, 10, E_INFO, EV_NONE, 0  ),
 "#  %'AuthMethod'%:  '%'perforce'%' if using standard authentication or '%'ldap'%' if\n"
 "#               this user should use native %'LDAP'% authentication.  The '+2fa'\n"
 "#               modifier can be added to the AuthMethod, requiring the user to\n"
-"#               perform second factor authentication in addition to password\n"
+"#               perform multi factor authentication in addition to password\n"
 "#               authentication. For example: '%'perforce+2fa'%'.\n"
 "#  %'Reviews'%:     Listing of depot files to be reviewed by user.\n" };
 
@@ -571,5 +576,26 @@ ErrorId MsgSpec::SpecRepo = { ErrorOf( ES_SPEC, 18, E_INFO, EV_NONE, 0  ),
 "#                 \"trunk\"); it must begin with \"refs/\" if git is to use it.\n"
 "#\n"
 "#                   See 'p4 help repo' for detailed information.\n" };
+
+ErrorId MsgSpec::SpecExtension = { ErrorOf( ES_SPEC, 19, E_INFO, EV_NONE, 0  ), 
+"# A %'Perforce Extension'% Specification.\n"
+"#\n"
+"#  %'ExtName'%:          The name of the Extension being configured.\n"
+"#  %'ExtDescription'%:   The description of the Extension being configured.\n"
+"#  %'ExtVersion'%:       The version of the Extension being configured.\n"
+"#  %'ExtUUID'%:          The UUID/key of the Extension being configured.\n"
+"#  %'ExtRev'%:           The revision of the Extension being configured.\n"
+"#  %'ExtMaxScriptTime'%: Maximum seconds the Extension may be run.\n"
+"#  %'ExtMaxScriptMem'%:  Maximum megabytes the Extension may be use.\n"
+"#  %'ExtAllowedGroups'%: Groups whose members may configure the Extension.\n"
+"#  %'ExtEnabled'%:       Enable/Disable this Extension.\n"
+"#  %'ExtP4USER'%:        Perforce user account for the Extension to use.\n"
+"#  %'Name'%:             The name of this Extension config.\n"
+"#  %'Owner'%:            The user who created this Extension config.\n"
+"#  %'Update'%:           Update time for the Extension config spec.\n"
+"#  %'Description'%:      The description of this Extension config.\n"
+"#  %'ExtConfig'%:        Extension-supplied configuration fields.\n"
+"#\n"
+"# See 'p4 help extension' for detailed information.\n" };
 
 // ErrorId graveyard: retired/deprecated ErrorIds. 

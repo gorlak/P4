@@ -45,6 +45,7 @@
 # include <ignore.h>
 # include <p4tags.h>
 # include <md5.h>
+# include <p4script.h>
 
 # include <msgclient.h>
 # include <msgsupp.h>
@@ -101,6 +102,8 @@ static const char long_usage[] =
 "	-Q charset	set command character set (default $P4COMMANDCHARSET)\n"
 "	-u user		set user's username (default $P4USER)\n"
 "\n"
+"	--script	Run the named P4-Lua script\n"
+"\n"
 "    The Perforce client 'p4' requires a valid Perforce server network\n"
 "    address 'P4PORT' for most operations, including its help system.\n"
 "    Without an explicit P4PORT, the Perforce client will use a default\n"
@@ -141,6 +144,7 @@ static int clientIgnores( int argc, char **argv, Options &, Error *e );
 int clientReplicate( int argc, char **argv, Options & );
 int clientInit( int argc, char **argv, Options &, int, Error *e );
 int clientInitHelp( int, Error *e );
+int clientLegalHelp( Error *e );
 int clientTrustHelp( Error *e );
 int jtail( int, char **, Options &, Options &, const char * );
 extern int commandChaining;
@@ -195,19 +199,26 @@ main( int argc, char **argv )
 void
 setVarsAndArgs( Client &client, int argc, char **argv, Options &opts)
 {
-	StrPtr *s;
+	// Set the version used in server log and monitor output
+	StrBuf v;
+	v << ID_REL "/" << ID_OS << "/" << ID_PATCH;
+
+	StrPtr *s, *version = NULL;
 
 	// Set any special -z var=value's, for debug
 	// Use -zfunc=something to override default func
 
 	for( int i = 0; s = opts.GetValue( 'z', i ); i++ )
+	{
+	    if( strstr( s->Text(), "prog=" ) == s->Text() )
+	        client.SetProg( s->Text() + 5 );
+	    if( strstr( s->Text(), "version=" ) == s->Text() )
+	        version = s;
 	    client.SetVarV( s->Text() );
+	}
 
-	// Set the version used in server log and monitor output
-	StrBuf v;
-	v << ID_REL "/" << ID_OS << "/" << ID_PATCH;
-	client.SetVar( P4Tag::v_version, v.Text() );
-
+	client.SetVersion( version ? version->Text() + 8
+	                           : v.Text() );
 	client.SetArgv( argc - 1, argv + 1 );
 }
 
@@ -231,7 +242,8 @@ static int clientLongOpts[] = { Options::Client,
 	                   Options::MessageType, Options::Directory,
 	                   Options::Variable, Options::Xargs, 
 	                   Options::Aliases, Options::Field,
-	                   Options::Color, 0 };
+	                   Options::Color, Options::Script,
+	                   Options::ScriptMaxMem, Options::ScriptMaxTime, 0 };
 
 static const char *clientOptFlags =
 	"?b:c:C:d:eE:F:GRhH:M:p:P:l:L:qQ:r#sIu:v:Vx:z:Z:"; 
@@ -417,6 +429,17 @@ clientRunCommand(
 	if( p4debug.GetLevel( DT_TIME ) >= 1 )
 	    debugHelper.Install();
 
+	if( opts[ Options::Script ] )
+	{
+	    p4script scr( P4SCRIPT_LUA_53, e );
+	    if( s = opts[ Options::ScriptMaxMem ] )
+	        scr.SetMaxMem( (scriptMem_t)s->Atoi64() );
+	    if( s = opts[ Options::ScriptMaxTime ] )
+	        scr.SetMaxTime( s->Atoi64() );
+	    s = opts[ Options::Script ];
+	    return !scr.doFile( s->Text(), e ) || e->Test();
+	}
+
 	// If we recognize the command (merge3, set), do it now */
 
 	if( argc && !strcmp( argv[0], "merge3" ) )
@@ -455,6 +478,10 @@ clientRunCommand(
 	        return clientInitHelp( 0, e );
 	    else if( !strcmp( argv[1], "trust" ) )
 	        return clientTrustHelp( e );
+	    else if( argc == 3 && !strcmp( argv[2], "legal" ) &&
+	             ( !strcmp( argv[1], "-l" ) ||
+	               !strcmp( argv[1], "--local" ) ) )
+	        return clientLegalHelp( e );
 	}
 
 	Client client;

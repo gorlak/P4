@@ -1,0 +1,22 @@
+SubDir P4 script libs lua-curlv3 ;
+
+SubDirC++Flags [ FDefines Z_PREFIX ] ;
+
+SubDirHdrs $(P4)/script/libs/cURL/ ;
+SubDirHdrs $(P4)/script/libs/cURL/curl ;
+
+SubDirHdrs $(P4)/script/ ;
+SubDirHdrs $(P4)/script/lua-5.3 ;
+SubDirHdrs [ FDirName $(SSLPREFIX) inc.$(EXEC_SUB_TOKENS[1]) ] ;
+
+Library $(P4SCRIPT_CURL) :
+	lceasy.cc
+	lcerror.cc
+	lchttppost.cc
+	lcmime.cc
+	lcmulti.cc
+	lcshare.cc
+	lcutils.cc
+	lcurl.cc
+	l52util.cc
+	;

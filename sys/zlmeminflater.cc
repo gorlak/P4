@@ -79,7 +79,7 @@ ZLMemInflater::GetChar2( int &eof, Error *e )
 	    z_streamp zls = (z_streamp)zstrm;
 
 	    zls->avail_out = workBuf->Length();
-	    zls->next_out = (z_Bytef *)workBuf->Text();
+	    zls->next_out = (Bytef *)workBuf->Text();
 
 	    zret = inflate( zls, Z_NO_FLUSH );
 	    if( zret != Z_OK && zret != Z_STREAM_END )

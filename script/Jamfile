@@ -1,0 +1,53 @@
+SubDir P4 script ;
+
+SubDirHdrs $(P4) client ;
+SubDirHdrs $(P4) script lua-5.3 ;
+
+local C++FLAGS = [ C++FLAGS+STD $(C++_VERSION_MAX) ] ;
+
+# Scripting is both exposed to the public API and requires C++17, so
+# we have to override the above local C++FLAGS when running the compat
+# check so we can see that the stub functions work.
+
+if $(C++_LANGUAGE_COMPAT_CHECK) = 1
+{
+	C++FLAGS = [ FRemoveAny $(C++FLAGS) : -std=$(C++_VERSION_MAX) /std:$(C++_VERSION_MAX) ] ;
+	C++FLAGS = [ C++FLAGS+STD $(C++_VERSION_BASELINE) ] ;
+}
+
+Library $(P4SCRIPT) :
+	clientapilua.cc
+	errorlua.cc
+	p4script53.cc
+	p4script.cc
+	;
+
+Library $(P4SCRIPT_SQLITE) : sqlite3.c lsqlite3.cc ;
+
+ObjectC++Flags p4script53.cc : -I $(P4)/script/lua-5.3 -I $(P4)/client ;
+# This is the LuaSQLite version, not the SQLite library itself.
+ObjectDefines p4script53.cc : SQLITE_VERSION=95 ;
+
+# https://www.sqlite.org/compile.html
+# Some, like SQLITE_OMIT_DECLTYPE and SQLITE_OMIT_DEPRECATED are required by
+# LuaSQLite3 so we leave them in.
+
+ObjectDefines sqlite3.c : SQLITE_THREADSAFE=0 ;
+ObjectDefines sqlite3.c : SQLITE_DEFAULT_MEMSTATUS=0 ;
+ObjectDefines sqlite3.c : SQLITE_DEFAULT_WAL_SYNCHRONOUS=1 ;
+ObjectDefines sqlite3.c : SQLITE_LIKE_DOESNT_MATCH_BLOBS ;
+ObjectDefines sqlite3.c : SQLITE_OMIT_SHARED_CACHE ;
+ObjectDefines sqlite3.c : SQLITE_DEFAULT_FILE_PERMISSIONS=0600 ;
+ObjectDefines sqlite3.c : SQLITE_ENABLE_API_ARMOR ;
+ObjectDefines sqlite3.c : SQLITE_ENABLE_JSON1 ;
+
+# -Os: https://www.sqlite.org/footprint.html
+ObjectCcFlags sqlite3.c : -Os ;
+
+ObjectC++Flags lsqlite3.cc : -I $(P4)/script/lua-5.3 ;
+ObjectC++Flags lsqlite3.cc : -I $(P4)/script/ ;
+# The version should be "0.9.5", but getting that past Jam and shell quoting
+# hasn't worked.
+#ObjectDefines  lsqlite3.cc : LSQLITE_VERSION=95 ;
+
+SubInclude P4 script libs ;

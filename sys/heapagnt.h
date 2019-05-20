@@ -66,7 +66,7 @@ typedef struct
    MEM_ERROR_INFO lastOkInfo;
    MEM_THREAD_ID threadID;
    unsigned long pid;
-	void *callStack[MEM_MAXCALLSTACK];
+   void *callStack[MEM_MAXCALLSTACK];
 } DBGMEM_POOL_INFO;
 
 /* Debug Ptr Info: parameter to dbgMemPtrInfo */
@@ -90,7 +90,7 @@ typedef struct
    MEM_BOOL isNoRealloc;
    MEM_THREAD_ID threadID;
    unsigned long pid;
-	void MEM_FAR *callStack[MEM_MAXCALLSTACK];
+   void MEM_FAR *callStack[MEM_MAXCALLSTACK];
 } DBGMEM_PTR_INFO;
 
 /* Stack checking settting: parameter to dbgMemSetStackChecking */
@@ -118,8 +118,8 @@ typedef struct
    unsigned outputFlags;
    const char MEM_FAR *outputFile;
    unsigned guardSize;
-	unsigned callstackChains;
-	DBGMEM_STACK_CHECKING stackChecking;
+   unsigned callstackChains;
+   DBGMEM_STACK_CHECKING stackChecking;
    unsigned char guardFill;
    unsigned char freeFill;
    unsigned char inUseFill;
@@ -354,11 +354,6 @@ inline void __huge * operator new(unsigned long count, size_t sz DBG_FORMAL)
 
 #endif /* compiler-specific versions of new */
 
-// Smart Heap has not tested non MFC apps using MEM_DEBUG.
-// This declaration is required for non MFC apps.
-inline void *operator new(size_t sz DBG_FORMAL)
-   { return shi_New(sz, file, line, 0); }
-
 /* version of new that passes memory allocation flags */
 inline void MEM_FAR *operator new(size_t sz DBG_FORMAL, unsigned flags)
    { return shi_New(sz DBG_ACTUAL, flags); }
@@ -404,13 +399,10 @@ inline void MEM_FAR *operator new[](size_t new_sz DBG_FORMAL,
 	|| (defined(_MSC_VER) && _MSC_VER >= 900)
 /* this must be defined out-of-line for _DEBUG MFC and MEM_DEBUG VC++/Win32 */
 void MEM_FAR * MEM_ENTRY_ANSI operator new(size_t sz DBG_FORMAL);
-// Smart Heap patch required to use MEM_DEBUG, Feb 2014.
 void MEM_FAR * MEM_ENTRY_ANSI operator new[](size_t sz DBG_FORMAL);
 #else
-#ifndef OS_LINUX
 inline void MEM_FAR *operator new(size_t sz DBG_FORMAL)
    { return shi_New(sz DBG_ACTUAL); }
-#endif
 
 #ifdef SHI_ARRAY_NEW
 inline void MEM_FAR *operator new[](size_t sz DBG_FORMAL)

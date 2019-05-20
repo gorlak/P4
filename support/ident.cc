@@ -41,14 +41,13 @@ Ident::GetMessage( StrBuf *s, int isServer )
 
 # if defined( OS_NT ) || defined( OS_LINUX )
     // Add credit for Smartheap memory manager
-    if( isServer )
+    if( isServer == 2 )
 	*s << "Portions copyright 1991-2005 Compuware Corporation.\n";
 # endif
 
 # ifdef USE_SSL
     *s << "This product includes software developed by the OpenSSL Project\n";
     *s << "for use in the OpenSSL Toolkit (http://www.openssl.org/)\n";
-    *s << "See 'p4 help legal' for full OpenSSL license information\n";
     *s << "Version of OpenSSL Libraries: " << OPENSSL_VERSION_TEXT << "\n";
 # endif //USE_SSL
 # ifdef USE_OPENLDAP
@@ -56,12 +55,21 @@ Ident::GetMessage( StrBuf *s, int isServer )
     *s << " (http://www.openldap.org/)\n";
     *s << "This product includes software developed by Computing Services\n";
     *s << "at Carnegie Mellon University: Cyrus SASL (http://www.cmu.edu/computing/)\n";
-    *s << "See 'p4 help legal' for full Cyrus SASL and OpenLDAP license information\n";
     *s << "Version of OpenLDAP Libraries: " << LDAP_VENDOR_VERSION_MAJOR << "."
         << LDAP_VENDOR_VERSION_MINOR << "." << LDAP_VENDOR_VERSION_PATCH << "\n";
     *s << "Version of Cyrus SASL Libraries: " << SASL_VERSION_MAJOR <<  "."
          << SASL_VERSION_MINOR << "." << SASL_VERSION_STEP << "\n";
 # endif //USE_OPENLDAP
+    *s << "See 'p4 help [ -l ] legal' for additional license information on\n";
+    *s << "these licenses and others.\n";
+# ifdef HAS_EXTENSIONS
+    if( !isServer )
+        *s << "Extensions/scripting support built-in.\n";
+# endif
+# ifdef HAS_PARALLEL_SYNC_THREADS
+    if( !isServer )
+        *s << "Parallel sync threading built-in.\n";
+# endif
 
     *s << "Rev. " << GetIdent() << " (" << GetDate() << ").\n";
 }

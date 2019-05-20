@@ -1,0 +1,42 @@
+SubDir P4 script libs cURL vauth ;
+
+# Note that this block is duplicated in the parent directory as
+# well as in vtls.
+
+if $(OS) = NT
+{
+	SubDirCcFlags /DCURL_STATICLIB /DWIN32 /FD /DBUILDING_LIBCURL
+	              /DCURL_DISABLE_FTP /DCURL_DISABLE_LDAP
+	              /DCURL_DISABLE_TELNET /DCURL_DISABLE_DICT
+	              /DCURL_DISABLE_FILE /DCURL_DISABLE_TFTP
+	              /DCURL_DISABLE_IMAP /DCURL_DISABLE_POP3
+	              /DUSE_OPENSSL /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+	              /DUSE_IPV6 /DCURL_DISABLE_NTLM ;
+}
+else
+{
+	SubDirCcFlags -DHAVE_CONFIG_H -DBUILDING_LIBCURL
+	              -DCURL_STATICLIB -DCURL_HIDDEN_SYMBOLS
+	              -fvisibility=hidden ;
+}
+
+SubDirCcFlags -I$(SSLINCDIR) [ FDefines Z_PREFIX ] ;
+
+SubDirHdrs $(P4) script libs cURL ;
+SubDirHdrs $(P4) script libs cURL curl ;
+
+Library $(P4SCRIPT_CURL) :
+	cleartext.c
+	cram.c
+	digest.c
+	digest_sspi.c
+	krb5_gssapi.c
+	krb5_sspi.c
+	ntlm.c
+	ntlm_sspi.c
+	oauth2.c
+	spnego_gssapi.c
+	spnego_sspi.c
+	vauth.c
+;
+

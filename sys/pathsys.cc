@@ -118,6 +118,29 @@ PathSys::Create( const StrPtr &os, Error *e )
 	return 0;
 }
 
+# ifdef HAS_CPP17
+
+PathSysUPtr PathSys::CreateUPtr()
+{
+	return std::make_unique< PathSys* >( Create() );
+}
+
+PathSysUPtr PathSys::CreateUPtr( const StrPtr &os, Error *e )
+{
+	return std::make_unique< PathSys* >( Create( os, e ) );
+}
+
+namespace std
+{
+	void default_delete< PathSys* >::operator()( PathSys **ptr )
+	{
+	    delete *ptr;
+	    delete ptr;
+	}
+}
+
+# endif
+
 void
 PathSys::Expand()
 {

@@ -290,6 +290,14 @@ class Options
 	                Depot2         , // --depot -d
 	                Reference      , // --reference -r
 	                Perm           , // --permission -p
+	                ForceFailover  , // failover -F
+	                IgnoreMaster   , // failover -i
+	                RequireMaster  , // failover -m
+	                FailoverYes    , // failover -y
+	                Failoverid     , // failover -s
+	                FailoverQuiesce, // failover -w
+	                FailoverVerification, // failover -v
+			Install        , // --install (extension)
 
 	        // options which have only long-form option names go here:
 
@@ -343,6 +351,18 @@ class Options
 			CreateIndex    , // --create-index (on a repo)
 			DropIndex      , // --drop-index (from a repo)
 			FirstParent    , // --first-parent (filelog)
+			Index          , // --index (filelog)
+			Graph          , // --graph (filelog)
+			Oneline        , // --oneline (filelog)
+			OneParent      , // --one-parent (filelog)
+			Merges         , // --merges (filelog)
+			CreateSampleExtension, // --sample (extension)
+			Undo           , // --undo (cherry-pick)
+			ParentNumber   , // --parent-number (undo)
+			PkgExtension   , // --package (extension)
+			Script         , // --script
+			ScriptMaxMem   , // --script-MaxMem
+			ScriptMaxTime  , // --script-MaxTime
 
 	                UnusedLastOption
 	} ;
@@ -377,6 +397,10 @@ class Options
 	int		HasOption( int i );
 	void		GetOptionName( int i, StrBuf &sb );
 	void		GetOptionValue( int i, StrBuf &sb );
+
+	static int		FindCode( const int code, Error *e );
+	static int		GetShortForm( const int ilist, Error *e );
+	static const char *	GetLongForm( const int ilist, Error *e );
 
     private:
 	int 		optc;

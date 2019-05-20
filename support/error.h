@@ -123,15 +123,15 @@ class Error {
 
     public:
 			Error() { ep = 0; severity = E_EMPTY; }
-			~Error();
+	virtual		~Error();
 
 	void 		operator =( const Error &source );
 	Error &		Merge( const Error &source );
 
-	void		Clear() { severity = E_EMPTY; }
+	virtual void	Clear() { severity = E_EMPTY; }
 	const ErrorId  *MapError( const struct ErrorIdMap map[] );
 
-	int		Test() const { return severity > E_INFO; }
+	virtual int	Test() const { return severity > E_INFO; }
 	int		IsInfo() const { return severity == E_INFO; }
 	int		IsWarning() const { return severity == E_WARN; }
 	int		IsError() const { return severity >= E_FAILED; }
@@ -152,6 +152,8 @@ class Error {
 			    eid.fmt = fmt;
 			    return Set( eid );
 			}
+
+	Error &		Set( const ErrorId &id, StrDict *errorDict );
 
 	Error &		operator <<( const StrPtr &arg );
 	Error &		operator <<( const StrPtr *arg );

@@ -24,13 +24,13 @@
 # ifdef BAD_MEMCCPY
 
 void *
-memccpy( void *t, const void *f, int c, register size_t n)
+memccpy( void *t, const void *f, int c, size_t n)
 {
 
 	if (n) {
-		register unsigned char *tp = (unsigned char *)t;
-		register const unsigned char *fp = (unsigned char *)f;
-		register unsigned char uc = c;
+		unsigned char *tp = (unsigned char *)t;
+		const unsigned char *fp = (unsigned char *)f;
+		unsigned char uc = c;
 		do {
 			if ((*tp++ = *fp++) == uc)
 				return (tp);

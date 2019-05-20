@@ -47,7 +47,7 @@ P4Library $(SUPPORTLIB) :
 	zlmeminflater.cc
 	;
 
-if $(OS) = MACOSX
+if $(OS) = MACOSX && [ FVersionCmp $(OSVER) : 1010 ] = -1
 {
 	P4Library $(SUPPORTLIB) : 
 		macfile.cc
@@ -60,6 +60,12 @@ else
 {
 	P4Library $(SUPPORTLIB) :
 		fileioapp.cc ;
+	
+	if $(OS) = MACOSX
+	{
+		P4Library $(SUPPORTLIB) :
+			macutil.m ;
+	}
 }
 
 if $(OS) = NT || $(OS) = MINGW || $(OS) = MINGW64

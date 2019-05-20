@@ -45,7 +45,7 @@ private:
     char *regpiece( int *flagp );
     char *regatom( int *flagp );
     char *regnode( int op );
-    char *regnext( register char *p );
+    char *regnext( char *p );
     void regc( int b );
     void reginsert( char op, char *opnd );
     void regtail( char *p, char *val );

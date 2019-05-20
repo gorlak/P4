@@ -240,9 +240,9 @@ V8Regex::compile( const char *exp, Error* e)
 {
 	error = e;
 
-	register char *scan;
-	register char *longest;
-	register unsigned len;
+	char *scan;
+	char *longest;
+	unsigned len;
 	int flags;
 
 	if (exp == NULL) {
@@ -332,10 +332,10 @@ V8Regex::reg(
 	int paren,			/* Parenthesized? */
 	int *flagp )
 {
-	register char *ret;
-	register char *br;
-	register char *ender;
-	register int parno;
+	char *ret;
+	char *br;
+	char *ender;
+	int parno;
 	int flags;
 
 	*flagp = HASWIDTH;	/* Tentatively. */
@@ -402,9 +402,9 @@ V8Regex::reg(
 char *
 V8Regex::regbranch( int *flagp )
 {
-	register char *ret;
-	register char *chain;
-	register char *latest;
+	char *ret;
+	char *chain;
+	char *latest;
 	int flags;
 
 	*flagp = WORST;		/* Tentatively. */
@@ -441,9 +441,9 @@ V8Regex::regbranch( int *flagp )
 char *
 V8Regex::regpiece( int *flagp )
 {
-	register char *ret;
-	register char op;
-	register char *next;
+	char *ret;
+	char op;
+	char *next;
 	int flags;
 
 	ret = regatom(&flags);
@@ -504,7 +504,7 @@ V8Regex::regpiece( int *flagp )
 char *
 V8Regex::regatom( int *flagp )
 {
-	register char *ret;
+	char *ret;
 	int flags;
 
 	*flagp = WORST;		/* Tentatively. */
@@ -522,8 +522,8 @@ V8Regex::regatom( int *flagp )
 		*flagp |= HASWIDTH|SIMPLE;
 		break;
 	case '[': {
-			register int classr;
-			register int classend;
+			int classr;
+			int classend;
 
 			if (*regparse == '^') {	/* Complement of range. */
 				ret = regnode(ANYBUT);
@@ -618,7 +618,7 @@ V8Regex::regatom( int *flagp )
 		 */
 		{
 			char *regprev;
-			register char ch;
+			char ch;
 
 			regparse--;			/* Look at cur char */
 			ret = regnode(EXACTLY);
@@ -681,8 +681,8 @@ V8Regex::regatom( int *flagp )
 char *			/* Location. */
 V8Regex::regnode( int op )
 {
-	register char *ret;
-	register char *ptr;
+	char *ret;
+	char *ptr;
 
 	ret = regcode;
 	if (ret == &regdummy) {
@@ -721,9 +721,9 @@ V8Regex::reginsert(
 	char op,
 	char *opnd )
 {
-	register char *src;
-	register char *dst;
-	register char *place;
+	char *src;
+	char *dst;
+	char *place;
 
 	if (regcode == &regdummy) {
 		regsize += 3;
@@ -750,9 +750,9 @@ V8Regex::regtail(
 	char *p,
 	char *val )
 {
-	register char *scan;
-	register char *temp;
-	register int offset;
+	char *scan;
+	char *temp;
+	int offset;
 
 	if (p == &regdummy)
 		return;
@@ -795,10 +795,10 @@ V8Regex::regoptail(
 
 int
 V8Regex::match(
-	register const char *str, Error * e )
+	const char *str, Error * e )
 {
 	error = e; // stored for subroutines
-	register char *s;
+	char *s;
 
 	/* Be paranoid... */
 	if (prog == NULL || str == NULL) {
@@ -859,9 +859,9 @@ V8Regex::regtry(
 	regexp *prog,
 	const char *str )
 {
-	register int i;
-	register const char **sp;
-	register const char **ep;
+	int i;
+	const char **sp;
+	const char **ep;
 
 	reginput = str;
 	regstartp = prog->startp;
@@ -894,7 +894,7 @@ V8Regex::regtry(
 int			/* 0 failure, 1 success */
 V8Regex::regmatch( char *prog )
 {
-	register char *scan;	/* Current node. */
+	char *scan;	/* Current node. */
 	char *next;		/* Next node. */
 
 	scan = prog;
@@ -931,8 +931,8 @@ V8Regex::regmatch( char *prog )
 			reginput++;
 			break;
 		case EXACTLY: {
-				register int len;
-				register char *opnd;
+				int len;
+				char *opnd;
 
 				opnd = OPERAND(scan);
 				/* Inline the first character, for speed. */
@@ -967,8 +967,8 @@ V8Regex::regmatch( char *prog )
 		case OPEN+7:
 		case OPEN+8:
 		case OPEN+9: {
-				register int no;
-				register const char *save;
+				int no;
+				const char *save;
 
 				no = OP(scan) - OPEN;
 				save = reginput;
@@ -995,8 +995,8 @@ V8Regex::regmatch( char *prog )
 		case CLOSE+7:
 		case CLOSE+8:
 		case CLOSE+9: {
-				register int no;
-				register const char *save;
+				int no;
+				const char *save;
 
 				no = OP(scan) - CLOSE;
 				save = reginput;
@@ -1015,7 +1015,7 @@ V8Regex::regmatch( char *prog )
 			}
 			break;
 		case BRANCH: {
-				register const char *save;
+				const char *save;
 
 				if (OP(next) != BRANCH)		/* No choice. */
 					next = OPERAND(scan);	/* Avoid recursion. */
@@ -1034,10 +1034,10 @@ V8Regex::regmatch( char *prog )
 			break;
 		case STAR:
 		case PLUS: {
-				register char nextch;
-				register int no;
-				register const char *save;
-				register int min;
+				char nextch;
+				int no;
+				const char *save;
+				int min;
 
 				/*
 				 * Lookahead to avoid useless match attempts
@@ -1087,9 +1087,9 @@ V8Regex::regmatch( char *prog )
 int
 V8Regex::regrepeat( char *p )
 {
-	register int count = 0;
-	register const char *scan;
-	register char *opnd;
+	int count = 0;
+	const char *scan;
+	char *opnd;
 
 	scan = reginput;
 	opnd = OPERAND(p);
@@ -1130,9 +1130,9 @@ V8Regex::regrepeat( char *p )
  - regnext - dig the "next" pointer out of a node
  */
 char *
-V8Regex::regnext( register char *p )
+V8Regex::regnext( char *p )
 {
-	register int offset;
+	int offset;
 
 	if (p == &regdummy)
 		return(NULL);

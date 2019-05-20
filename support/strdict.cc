@@ -61,6 +61,22 @@ StrDict::SetVar( const char *var, int value )
 	VSetVar( StrRef( (char*)var ), StrNum( value ) );
 }
 
+# ifdef HAVE_INT64
+
+void		
+StrDict::SetVar( const char *var, long value )
+{
+	VSetVar( StrRef( (char*)var ), StrNum( value ) );
+}
+
+void		
+StrDict::SetVar( const char *var, P4INT64 value )
+{
+	VSetVar( StrRef( (char*)var ), StrNum( value ) );
+}
+
+# endif
+
 void		
 StrDict::SetVar( const char *var, const char *value )
 {

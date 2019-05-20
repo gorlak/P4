@@ -30,6 +30,7 @@ class MsgSpec {
 	static ErrorId SpecUser;
 	static ErrorId SpecJob;
 	static ErrorId SpecEditSpec;
+	static ErrorId SpecExtension;
 
 	// Retired ErrorIds. We need to keep these so that clients 
 	// built with newer apis can commnunicate with older servers 

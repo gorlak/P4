@@ -64,7 +64,7 @@
 void 
 LineReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	if( !src->Eof() ) 
 	    while( !e->Test() )
@@ -115,7 +115,7 @@ LineReader::Equal(LineNo lineA, Sequence *B, LineNo lineB)
 void 
 WordReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	if( !src->Eof() ) 
 	    while( !e->Test() )
@@ -145,7 +145,7 @@ WordReader::Load( Error *e )
 void 
 WClassReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	int lastcharclass = 0;
 	UChar c = 0;
@@ -221,7 +221,7 @@ WClassReader::Load( Error *e )
 void 
 DifflReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	while( !src->Eof() && !e->Test() )
 	{
@@ -316,7 +316,7 @@ DifflReader::Equal(LineNo lineA, Sequence *B, LineNo lineB)
 void 
 DiffbReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	while( !src->Eof() && !e->Test() ) 
 	{
@@ -440,7 +440,7 @@ DiffbReader::Equal(LineNo lineA, Sequence *B, LineNo lineB)
 void 
 DiffwReader::Load( Error *e )
 {
-	register HashVal h = 0;
+	HashVal h = 0;
 
 	while( !src->Eof() && !e->Test() ) 
 	{

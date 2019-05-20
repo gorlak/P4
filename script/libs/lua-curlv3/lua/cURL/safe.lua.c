@@ -1,0 +1,16 @@
+static const char* curlsafe_str =
+"--\n"
+"--  Author: Alexey Melnichuk <alexeymelnichuck@gmail.com>\n"
+"--\n"
+"--  Copyright (C) 2014-2016 Alexey Melnichuk <alexeymelnichuck@gmail.com>\n"
+"--\n"
+"--  Licensed according to the included 'LICENSE' document\n"
+"--\n"
+"--  This file is part of Lua-cURL library.\n"
+"--\n"
+"\n"
+"local curl = require \"lcurl.safe\"\n"
+"local impl = require \"cURL.impl.cURL\"\n"
+"\n"
+"return impl(curl)\n"
+;

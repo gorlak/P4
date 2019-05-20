@@ -22,7 +22,7 @@
  * When adding a new error make sure its greater than the current high
  * value and update the following number:
  *
- * Current high value for a MsgSupp error code is: 324
+ * Current high value for a MsgSupp error code is: 351
  */
 
 # include <error.h>
@@ -45,6 +45,9 @@ ErrorId MsgSupp::Usage                 = { ErrorOf( ES_SUPP, 8, E_FAILED, EV_USA
 ErrorId MsgSupp::OptionData            = { ErrorOf( ES_SUPP, 31, E_INFO, EV_NONE, 3 ), "-%flag%%flag2%='%value%'" } ;
 
 ErrorId MsgSupp::NoParm                = { ErrorOf( ES_SUPP, 9, E_FATAL, EV_FAULT, 1 ), "Required parameter '%arg%' not set!" } ; //NOTRANS
+
+ErrorId MsgSupp::CodeNotFound          = { ErrorOf( ES_SUPP, 348, E_FATAL, EV_FAULT, 1 ), "Option code %code% not found in list." } ;
+ErrorId MsgSupp::BadListIndex          = { ErrorOf( ES_SUPP, 349, E_FATAL, EV_FAULT, 1 ), "List index %ilist% is not valid." } ;
 
 ErrorId MsgSupp::NoUnixReg             = { ErrorOf( ES_SUPP, 10, E_WARN, EV_NONE, 0 ), "Can't set registry on UNIX." } ;
 ErrorId MsgSupp::NoSuchVariable        = { ErrorOf( ES_SUPP, 34, E_WARN, EV_NONE, 1 ), "Unrecognized variable name %varName%. Comment lines should contain '#' in column 1." } ;
@@ -350,10 +353,28 @@ ErrorId MsgSupp::OptionAllowEmpty         = { ErrorOf( ES_SUPP, 308, E_INFO, EV_
 ErrorId MsgSupp::OptionAdded              = { ErrorOf( ES_SUPP, 309, E_INFO, EV_NONE, 0 ), "%'--added (-a)'%: display content of added files." } ;
 ErrorId MsgSupp::OptionCreateIndex        = { ErrorOf( ES_SUPP, 310, E_INFO, EV_NONE, 0 ), "%'--create-index'%: create repo index for direct file history access." } ;
 ErrorId MsgSupp::OptionDropIndex          = { ErrorOf( ES_SUPP, 311, E_INFO, EV_NONE, 0 ), "%'--drop-index'%: drop repo index." } ;
+ErrorId MsgSupp::OptionFirstParent        = { ErrorOf( ES_SUPP, 327, E_INFO, EV_NONE, 0 ), "%'--first-parent'%: follow first parent." } ;
+ErrorId MsgSupp::OptionIndex              = { ErrorOf( ES_SUPP, 328, E_INFO, EV_NONE, 0 ), "%'--index'%: use graph index." } ;
+ErrorId MsgSupp::OptionGraph              = { ErrorOf( ES_SUPP, 329, E_INFO, EV_NONE, 0 ), "%'--graph'%: walk the DAG." } ;
+ErrorId MsgSupp::OptionOneParent          = { ErrorOf( ES_SUPP, 343, E_INFO, EV_NONE, 0 ), "%'--one-parent'%: follow only one parent with difference." } ;
+ErrorId MsgSupp::OptionOneline            = { ErrorOf( ES_SUPP, 331, E_INFO, EV_NONE, 0 ), "%'--oneline'%: display git --oneline output" } ;
+ErrorId MsgSupp::OptionMerges             = { ErrorOf( ES_SUPP, 346, E_INFO, EV_NONE, 0 ), "%'--merges'%: display only merge commits" } ;
+ErrorId MsgSupp::OptionInstall            = { ErrorOf( ES_SUPP, 338, E_INFO, EV_NONE, 0 ), "%'--install'%: submit extension file into extension depot." } ;
+ErrorId MsgSupp::OptionCreateSampleExt    = { ErrorOf( ES_SUPP, 345, E_INFO, EV_NONE, 0 ), "%'--sample'%: create a sample extension." } ;
+ErrorId MsgSupp::OptionParentNumber       = { ErrorOf( ES_SUPP, 344, E_INFO, EV_NONE, 0 ), "%'--parent-number'%: undo the change relative to the specified parent" } ;
+ErrorId MsgSupp::OptionUndo               = { ErrorOf( ES_SUPP, 342, E_INFO, EV_NONE, 0 ), "%'--undo'%: back out some existing commits" } ;
+ErrorId MsgSupp::OptionPkgExtension       = { ErrorOf( ES_SUPP, 347, E_INFO, EV_NONE, 0 ), "%'--package'%: generate extension package." } ;
 ErrorId MsgSupp::OptionRepoName2          = { ErrorOf( ES_SUPP, 323, E_INFO, EV_NONE, 0 ), "%'--repo (-n)'%: specifies the repo." } ;
 ErrorId MsgSupp::OptionRetry              = { ErrorOf( ES_SUPP, 318, E_INFO, EV_NONE, 0 ), "%'--retry (-R)'%: retry transfer of files that failed to transfer." } ;
 ErrorId MsgSupp::OptionReference          = { ErrorOf( ES_SUPP, 325, E_INFO, EV_NONE, 0 ), "%'--reference (-r)'%: specifies the reference." } ;
 ErrorId MsgSupp::OptionPerm               = { ErrorOf( ES_SUPP, 326, E_INFO, EV_NONE, 0 ), "%'--permission (-p)'%: specifies the permission." } ;
+ErrorId MsgSupp::OptionForceFailover      = { ErrorOf( ES_SUPP, 332, E_INFO, EV_NONE, 0 ), "%'--force (-F)'%: force failover to the extent possible when errors would otherwise prevent it (unsupported and not recommended)." } ;
+ErrorId MsgSupp::OptionIgnoreMaster       = { ErrorOf( ES_SUPP, 333, E_INFO, EV_NONE, 0 ), "%'--ignore-master (-i)'%: ignore server from which failover is to occur (even if it is accessible). Beware of a split-brain scenario!" } ;
+ErrorId MsgSupp::OptionRequireMaster      = { ErrorOf( ES_SUPP, 334, E_INFO, EV_NONE, 0 ), "%'--require-master (-m)'%: server from which failover is to occur must participate." } ;
+ErrorId MsgSupp::OptionFailoverYes        = { ErrorOf( ES_SUPP, 335, E_INFO, EV_NONE, 0 ), "%'--yes (-y)'%: execute the failover rather than just checking that the failover could occur." } ;
+ErrorId MsgSupp::OptionFailoverid         = { ErrorOf( ES_SUPP, 336, E_INFO, EV_NONE, 0 ), "%'--serverid (-s)'%: ID of the server from which failover is to occur." } ;
+ErrorId MsgSupp::OptionFailoverQuiesce    = { ErrorOf( ES_SUPP, 337, E_INFO, EV_NONE, 0 ), "%'--quiesce-wait (-w)'%: time (in seconds) to wait for commands to complete on the server from which failover is to occur." } ;
+ErrorId MsgSupp::OptionFailoverVerification  = { ErrorOf( ES_SUPP, 350, E_INFO, EV_NONE, 0 ), "%'--verification (-v)'%: time (in seconds) defining recently updated depot files requiring digest verification." } ;
 
 ErrorId MsgSupp::JsmnBadType              = { ErrorOf( ES_SUPP, 312, E_FAILED, EV_CONFIG, 3 ), "JSON error: token not expected type. Token number %index% Expected type %expected% Observed type %observed%." } ;
 ErrorId MsgSupp::JsmnBadParent            = { ErrorOf( ES_SUPP, 313, E_FAILED, EV_CONFIG, 3 ), "JSON error: token does not have the expected parent. Token number %index% Expected parent index %expected% Observed parent index %observed%." } ;
@@ -361,6 +382,10 @@ ErrorId MsgSupp::JsmnBadMem               = { ErrorOf( ES_SUPP, 314, E_FAILED, E
 ErrorId MsgSupp::JsmnBadSyn               = { ErrorOf( ES_SUPP, 315, E_FAILED, EV_CONFIG, 0 ), "JSON error: parse failed, bad syntax." } ;
 ErrorId MsgSupp::JsmnTooFew               = { ErrorOf( ES_SUPP, 316, E_FAILED, EV_CONFIG, 0 ), "JSON error: parse failed, missing tokens." } ;
 ErrorId MsgSupp::JsmnKeyNotFound          = { ErrorOf( ES_SUPP, 317, E_FAILED, EV_CONFIG, 2 ), "JSON error: not found key name \"%tname%\" in token at index %index%." } ;
+ErrorId MsgSupp::ManifestKeyNotFound      = { ErrorOf( ES_SUPP, 339, E_FAILED, EV_CONFIG, 1 ), "The \"%tname%\" key is required in the extension manifest." } ;
+ErrorId MsgSupp::ManifestValueEmpty       = { ErrorOf( ES_SUPP, 340, E_FAILED, EV_CONFIG, 1 ), "The \"%tname%\" value is empty. It is required in the extension manifest." } ;
+ErrorId MsgSupp::ManifestValueTypeInvalid = { ErrorOf( ES_SUPP, 341, E_FAILED, EV_CONFIG, 1 ), "The key \"%tname%\" was expected to have a value with the type of \"%expected%\", but was \"%observed%\"." } ;
+ErrorId MsgSupp::InvalidIntegerRange      = { ErrorOf( ES_SUPP, 351, E_FAILED, EV_USAGE, 3 ), "Invalid range for '%value%'. Must be between '%min%' and '%max%'." } ;
 
 // ErrorId graveyard'%: retired/deprecated ErrorIds.
 

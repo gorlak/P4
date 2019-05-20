@@ -85,6 +85,7 @@ struct EchoContext
 void 
 EchoCleanup( NoEcho *noEcho )
 {
+	noEcho->SetCleanup( false );
 	delete noEcho;
 }
 
@@ -96,6 +97,7 @@ NoEcho::NoEcho()
 	context->tio2 = context->tio;
 	TIO_NOECHO( context->tio );
 	TIO_SET( context->tio );
+	cleanup = true;
 	signaler.OnIntr( (SignalFunc)EchoCleanup, this );
 }
 
@@ -103,6 +105,15 @@ NoEcho::~NoEcho()
 {
 	TIO_SET( context->tio2 );
 	fputc( '\n', stdout );
-	signaler.DeleteOnIntr( this );
+	if( cleanup )
+	{
+	    SetCleanup( false );
+	    signaler.DeleteOnIntr( this );
+	}
 	delete context;
+}
+
+void NoEcho::SetCleanup( bool v )
+{
+	cleanup = v;
 }

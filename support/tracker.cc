@@ -53,9 +53,11 @@ static int grid[ TT_LAST ][ 7 ] = {
 /* PX_FAULTS_OTH */       Alot,   1, 1, 1,      1,       1,        1,    
 /* PX_FLUSHES */          Alot,   1, 1, 100,    1000,    10000,    10000,
 /* PX_DELIVERIES */       Alot,   1, 1, 1000,   10000,   100000,   100000,
-/* PX_DELIVERIES_MB */    Alot,   1, 1, 100,    1000,    10000,    10000,
+/* PX_DELIVERIES_BYTES */ Alot,   1, 1, 100000000, 100000000, 100000000, 100000000,
 /* PX_TOT_FAULTS */       Alot,   1, 1, 100,    1000,    10000,    10000,
-/* PX_TOT_FAULTS_MB */    Alot,   1, 1, 100,    1000,    10000,    10000,
+/* PX_TOT_FAULTS_BYTES */ Alot,   1, 1, 100000000, 100000000, 100000000, 100000000,
+/* PX_DIRECT_COUNT */     Alot,   1, 1, 100,    1000,    10000,    10000,
+/* PX_DIRECT_BYTES */     Alot,   1, 1, 100000000, 100000000, 100000000, 100000000,
 
 } ;
 

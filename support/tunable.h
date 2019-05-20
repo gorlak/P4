@@ -85,6 +85,7 @@ enum P4TunableName {
 	P4TUNE_DM_USER_INSECURELOGIN,		// see userlogin.cc
 	P4TUNE_DM_USER_LOGINATTEMPTS,		// see dmauser.cc
 	P4TUNE_DM_USER_NOAUTOCREATE,		// see dmauser.cc
+	P4TUNE_DM_USER_NUMERIC,		// see dmauser.cc
 	P4TUNE_DM_USER_RESETPASSWORD,		// see dmauser.cc
 	P4TUNE_FILESYS_BINARYSCAN,		// see filecheck.cc
 	P4TUNE_FILESYS_BUFSIZE,			// see filesys.h
@@ -126,6 +127,7 @@ enum P4TunableName {
 	P4TUNE_NET_KEEPALIVE_INTERVAL,		// see nettcptransport.cc
 	P4TUNE_NET_KEEPALIVE_COUNT,		// see nettcptransport.cc
 	P4TUNE_NET_MAX_FAULT_PUB,		// see proxy/pxclient.cc
+	P4TUNE_NET_MAXCLOSEWAIT,		// see nettcptransport.cc, netssltrancport.cc
 	P4TUNE_NET_MAXWAIT,			// see nettcptransport.cc, netssltrancport.cc
 	P4TUNE_NET_PARALLEL_MAX,		// see dmparsend.cc
 	P4TUNE_NET_PARALLEL_THREADS,		// see usersync.cc
@@ -236,6 +238,8 @@ enum P4TunableName {
 	P4TUNE_RPL_SUBMIT_NOCOPY,		// see usersubmit.cc
 	P4TUNE_AUTH_2FA_PERSIST,		// see login2.cc
 	P4TUNE_AUTH_TICKETS_NOUNLOCKED,		// see login.cc
+	P4TUNE_AUTH_SSO_ALLOW_PASSWD,		// see login.cc
+	P4TUNE_AUTH_SSO_NONLDAP,		// see login.cc
 
 	P4TUNE_LAST
 

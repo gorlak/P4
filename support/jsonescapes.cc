@@ -165,6 +165,28 @@ jsonEscapes( const char *input, int len, StrBuf &out )
 	out.Terminate();
 }
 
+// Look for and replace:
+// " \ \n \r \t
+void
+jsonEscape( const StrPtr *in, StrBuf &out )
+{
+	out.Clear();
+	char *p = in->Text();
+	while( *p )
+	{
+	    switch(*p)
+	    {
+	    case '\"': out.Append( "\\\"" ); break;
+	    case '\\': out.Append( "\\\\" ); break;
+	    case '\n': out.Append( "\\n" );  break;
+	    case '\r': out.Append( "\\r" );  break;
+	    case '\t': out.Append( "\\t" );  break;
+	    default:   out.Append( p, 1 );   break;
+	    }
+	    p++;
+	}
+}
+
 // Convert the codepoint into the correct sequence of utf8
 // bytes.
 void

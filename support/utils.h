@@ -113,3 +113,14 @@ private:
 	T*        pData;       // data pointer
 	RefCount* ref;         // reference count
 };
+
+
+// global utility funciton
+
+/**
+ * ISHex
+ * - return true if c is a valid character for a hex value, 
+ * - otherwise return false.
+ */
+
+bool IsHex( char c );
