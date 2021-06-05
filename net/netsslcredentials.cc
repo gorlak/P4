@@ -218,7 +218,7 @@ NetSslCredentials::ReadCredentials(  Error *e )
 	privateKey = PEM_read_PrivateKey(fp, NULL, 0, NULL );
 	SSLNULLHANDLER( privateKey, e, "NetSslCredentials::ReadCredentials PEM_read_PrivateKey", failSetError );
 	// verify that RSA key
-	if (privateKey->type != EVP_PKEY_RSA)
+	if (EVP_PKEY_get1_RSA(privateKey) != NULL)
 	{
 	    e->Set( MsgRpc::SslKeyNotRSA );
 	    goto fail;

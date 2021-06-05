@@ -39,48 +39,6 @@
 # ifdef USE_SSL
 
 ////////////////////////////////////////////////////////////////////////////
-//  OpenSSL Dynamic Locking Callback Functions                            //
-////////////////////////////////////////////////////////////////////////////
-
-// Dynamic locking code only being used on NT in 2012.1, will be used on
-// other platforms in 2012.2 (by that time I will include pthreads to the
-// HPUX build). In 2012.1 HPUX has many compile errors for pthreads.
-#ifndef OS_HPUX
-
-# ifdef OS_NT
-struct CRYPTO_dynlock_value
-{
-    HANDLE mutex;
-};
-# else
-struct CRYPTO_dynlock_value
-{
-    pthread_mutex_t mutex;
-};
-# endif // OS_NT
-
-extern "C" {
-
-static int
-InitLockCallbacks( Error *e );
-static int
-ShutdownLockCallbacks(void);
-static void
-LockingFunction(int mode, int n, const char *file, int line);
-static unsigned long
-IdFunction(void);
-static struct CRYPTO_dynlock_value *
-DynCreateFunction(const char *file, int line);
-static void
-DynLockFunction(int mode, struct CRYPTO_dynlock_value *l, const char *file, int line);
-static void
-DynDestroyFunction(struct CRYPTO_dynlock_value *l, const char *file, int line);
-
-}
-
-#endif //OS_HPUX
-
-////////////////////////////////////////////////////////////////////////////
 //  Class NetSslTransport                                                 //
 ////////////////////////////////////////////////////////////////////////////
 

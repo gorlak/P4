@@ -111,11 +111,6 @@ const char *P4SslVersionString = OPENSSL_VERSION_TEXT;
 unsigned long sCompileVersion =  OPENSSL_VERSION_NUMBER;
 unsigned long sVersion1_0_0 =  0x1000000f;
 const char *sVerStr1_0_0 = "1.0.0";
-# ifdef OS_NT
-static HANDLE mutexArray[ CRYPTO_NUM_LOCKS ];
-# else
-static pthread_mutex_t mutexArray[ CRYPTO_NUM_LOCKS ];
-# endif
 
 typedef struct {
     int		value;
@@ -416,12 +411,6 @@ NetSslTransport::SslClientInit(Error *e)
 
 	if( !sClientCtx )
 	{
-#ifdef OS_NT
-	    InitLockCallbacks( e );
-	    if( e->Test())
-		return;
-#endif // OS_NT
-
 	    ValidateRuntimeVsCompiletimeSSLVersion( e );
 	    if( e->Test() )
 	    {
@@ -516,12 +505,6 @@ NetSslTransport::SslServerInit(StrPtr *hostname, Error *e)
 
 	if( !sServerCtx )
 	{
-#ifdef OS_NT
-	    InitLockCallbacks( e );
-	    if( e->Test())
-		return;
-#endif // OS_NT
-
 	    /*
 	     * Added due to job084753: Swarm is a web app that reuses client processes.
 	     * See the SslClientInit code for more info.
@@ -1508,184 +1491,5 @@ NetSslTransport::GetVersionString( StrBuf &sb, unsigned long version )
 	unsigned long P = (version >> 12) & ~0xffffff00L;
 	sb << M << "." << N << "." << P;
 }
-
-////////////////////////////////////////////////////////////////////////////
-//  OpenSSL Dynamic Locking Callback Functions                            //
-////////////////////////////////////////////////////////////////////////////
-// Dynamic locking code only being used on NT in 2012.1, will be used on
-// other platforms in 2012.2 (by that time I will include pthreads to the
-// HPUX build). In 2012.1 HPUX has many compile errors for pthreads.
-#ifndef OS_HPUX
-
-static void LockingFunction( int mode, int n, const char *file, int line )
-{
-# ifdef OS_NT
-    if (mode & CRYPTO_LOCK)
-    {
-	WaitForSingleObject( mutexArray[n], INFINITE );
-    }
-    else
-    {
-	ReleaseMutex( mutexArray[n] );
-    }
-# else
-    if( mode & CRYPTO_LOCK )
-    {
-	pthread_mutex_lock( &mutexArray[n] );
-    }
-    else
-    {
-	pthread_mutex_unlock( &mutexArray[n] );
-    }
-# endif // OS_NT
-}
-
-/**
- * OpenSSL uniq id function.
- *
- * @return    thread id
- */
-static unsigned long IdFunction( void )
-{
-# ifdef OS_NT
-    return ((unsigned long) GetCurrentThreadId());
-# else
-    return ((unsigned long) pthread_self());
-# endif
-}
-
-/**
- * OpenSSL allocate and initialize dynamic crypto lock.
- *
- * @param    file    source file name
- * @param    line    source file line number
- */
-static struct CRYPTO_dynlock_value *
-DynCreateFunction( const char *file, int line )
-{
-    struct CRYPTO_dynlock_value *value;
-
-    value = (struct CRYPTO_dynlock_value *) malloc(
-	    sizeof(struct CRYPTO_dynlock_value) );
-    if( !value )
-    {
-	goto err;
-    }
-# ifdef OS_NT
-    value->mutex = CreateMutex( NULL, FALSE, NULL );
-# else
-    pthread_mutex_init( &value->mutex, NULL );
-# endif // OS_NT
-    return value;
-
-    err: return (NULL);
-}
-
-/**
- * OpenSSL dynamic locking function.
- *
- * @param    mode    lock mode
- * @param    l        lock structure pointer
- * @param    file    source file name
- * @param    line    source file line number
- * @return    none
- */
-static void DynLockFunction(
-        int mode,
-        struct CRYPTO_dynlock_value *l,
-        const char *file,
-        int line )
-{
-# ifdef OS_NT
-    if (mode & CRYPTO_LOCK)
-    {
-	WaitForSingleObject( l->mutex, INFINITE );
-    }
-    else
-    {
-	ReleaseMutex( l->mutex );
-    }
-# else
-    if( mode & CRYPTO_LOCK )
-    {
-	pthread_mutex_lock( &l->mutex );
-    }
-    else
-    {
-	pthread_mutex_unlock( &l->mutex );
-    }
-# endif // OS_NT
-}
-
-/**
- * OpenSSL destroy dynamic crypto lock.
- *
- * @param    l        lock structure pointer
- * @param    file    source file name
- * @param    line    source file line number
- * @return    none
- */
-
-static void DynDestroyFunction(
-        struct CRYPTO_dynlock_value *l,
-        const char *file,
-        int line )
-{
-# ifdef OS_NT
-    CloseHandle(l->mutex);
-# else
-    pthread_mutex_destroy( &l->mutex );
-# endif // OS_NT
-    free( l );
-}
-
-static int InitLockCallbacks( Error *e )
-{
-	for ( int i = 0; i < CRYPTO_num_locks(); i++ )
-	{
-# ifdef OS_NT
-	    mutexArray[i] = CreateMutex( NULL, FALSE, NULL );
-# else
-	    pthread_mutex_init( &mutexArray[i], NULL );
-# endif // OS_NT
-	}
-	/* static locks callbacks */
-	CRYPTO_set_locking_callback( LockingFunction );
-	CRYPTO_set_id_callback( IdFunction );
-	/* dynamic locks callbacks */
-	CRYPTO_set_dynlock_create_callback( DynCreateFunction );
-	CRYPTO_set_dynlock_lock_callback( DynLockFunction );
-	CRYPTO_set_dynlock_destroy_callback( DynDestroyFunction );
-
-	return (0);
-}
-
-/**
- * Cleanup TLS library.
- *
- * @return    0
- */
-static int ShutdownLockCallbacks( void )
-{
-    CRYPTO_set_dynlock_create_callback( NULL );
-    CRYPTO_set_dynlock_lock_callback( NULL );
-    CRYPTO_set_dynlock_destroy_callback( NULL );
-
-    CRYPTO_set_locking_callback( NULL );
-    CRYPTO_set_id_callback( NULL );
-
-    for ( int i = 0; i < CRYPTO_num_locks(); i++ )
-    {
-# ifdef OS_NT
-	CloseHandle( mutexArray[i] );
-# else
-	pthread_mutex_destroy( &mutexArray[i] );
-# endif // OS_NT
-    }
-
-    return (0);
-}
-
-# endif // !OS_HPUX
 
 # endif //USE_SSL
